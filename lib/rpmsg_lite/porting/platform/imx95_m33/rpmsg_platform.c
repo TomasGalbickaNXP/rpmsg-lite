@@ -113,7 +113,7 @@ void platform_notify(uint32_t vector_id)
 /*
  * MU Interrrupt RPMsg handler
  */
-int32_t MU1_A_IRQHandler(void)
+int32_t MU1_B_IRQHandler(void)
 {
     uint32_t channel;
 

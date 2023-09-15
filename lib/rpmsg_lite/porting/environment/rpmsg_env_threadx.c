@@ -42,6 +42,10 @@ static TX_EVENT_FLAGS_GROUP event_group = {0};
  */
 #define RL_ENV_MAX_MUTEX_COUNT (10)
 
+#ifndef TX_TIMER_TICKS_PER_SECOND
+#define TX_TIMER_TICKS_PER_SECOND ((ULONG)100)
+#endif
+
 /* Max supported ISR counts */
 #define ISR_COUNT (32U)
 /*!

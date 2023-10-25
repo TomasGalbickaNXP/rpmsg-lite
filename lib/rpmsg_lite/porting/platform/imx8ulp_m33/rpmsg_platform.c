@@ -74,7 +74,8 @@ int32_t platform_init_interrupt(uint32_t vector_id, void *isr_data)
                 RL_ASSERT(0 <= isr_counter1);
                 if (isr_counter1 == 0)
                 {
-                    MU_EnableInterrupts(APP_M33_FUSION_DSP_MU, (uint32_t)kMU_Rx0FullInterruptEnable << RPMSG_MU_CHANNEL);
+                    MU_EnableInterrupts(APP_M33_FUSION_DSP_MU,
+                                        (uint32_t)kMU_Rx0FullInterruptEnable << RPMSG_MU_CHANNEL);
                 }
                 isr_counter1++;
                 break;
@@ -122,7 +123,8 @@ int32_t platform_deinit_interrupt(uint32_t vector_id)
                 isr_counter1--;
                 if (isr_counter1 == 0)
                 {
-                    MU_DisableInterrupts(APP_M33_FUSION_DSP_MU, (uint32_t)kMU_Rx0FullInterruptEnable << RPMSG_MU_CHANNEL);
+                    MU_DisableInterrupts(APP_M33_FUSION_DSP_MU,
+                                         (uint32_t)kMU_Rx0FullInterruptEnable << RPMSG_MU_CHANNEL);
                 }
                 break;
             case RL_PLATFORM_IMX8ULP_M33_HIFI4_COM_ID:

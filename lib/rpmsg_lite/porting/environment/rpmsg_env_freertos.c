@@ -57,8 +57,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-static int32_t env_init_counter       = 0;
-static SemaphoreHandle_t env_sema     = ((void *)0);
+static int32_t env_init_counter   = 0;
+static SemaphoreHandle_t env_sema = ((void *)0);
 #ifndef __COVERAGESCANNER__
 static EventGroupHandle_t event_group = ((void *)0);
 #else

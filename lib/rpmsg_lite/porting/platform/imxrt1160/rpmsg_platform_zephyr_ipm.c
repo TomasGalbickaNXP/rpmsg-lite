@@ -11,6 +11,7 @@
 
 #include "rpmsg_platform.h"
 #include "rpmsg_env.h"
+
 #include <zephyr/drivers/ipm.h>
 
 #if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
@@ -88,7 +89,7 @@ void platform_notify(uint32_t vector_id)
 {
     switch (RL_GET_LINK_ID(vector_id))
     {
-        case RL_PLATFORM_LPC5411x_M4_M0_LINK_ID:
+        case RL_PLATFORM_IMXRT1160_M7_M4_LINK_ID:
             env_lock_mutex(platform_lock);
             uint32_t data = (1 << RL_GET_Q_ID(vector_id));
             RL_ASSERT(ipm_handle);

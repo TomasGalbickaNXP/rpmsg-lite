@@ -20,8 +20,7 @@ static void *platform_lock;
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
 static LOCK_STATIC_CONTEXT platform_lock_static_ctxt;
 #endif
-static const struct device *const ipm_handle =
-    DEVICE_DT_GET(DT_CHOSEN(zephyr_ipc));
+static const struct device *const ipm_handle = DEVICE_DT_GET(DT_CHOSEN(zephyr_ipc));
 
 void platform_ipm_callback(const struct device *dev, void *context, uint32_t id, volatile void *data)
 {

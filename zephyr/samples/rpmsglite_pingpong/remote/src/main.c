@@ -19,8 +19,8 @@
 #define APP_RPMSG_READY_EVENT_DATA    (1U)
 #define APP_RPMSG_EP_READY_EVENT_DATA (2U)
 
-#define SHM_MEM_ADDR		DT_REG_ADDR(DT_CHOSEN(zephyr_ipc_shm))
-#define SHM_MEM_SIZE	    DT_REG_SIZE(DT_CHOSEN(zephyr_ipc_shm))
+#define SHM_MEM_ADDR DT_REG_ADDR(DT_CHOSEN(zephyr_ipc_shm))
+#define SHM_MEM_SIZE DT_REG_SIZE(DT_CHOSEN(zephyr_ipc_shm))
 
 #define APP_THREAD_STACK_SIZE (1024)
 K_THREAD_STACK_DEFINE(thread_stack, APP_THREAD_STACK_SIZE);
@@ -50,7 +50,7 @@ static int32_t rpmsg_ept_read_cb(void *payload, uint32_t payload_len, uint32_t s
     if (payload_len <= sizeof(THE_MESSAGE))
     {
         (void)memcpy((void *)&g_msg, payload, payload_len);
-        g_remote_addr   = src;
+        g_remote_addr = src;
         *has_received = 1;
     }
     return RL_RELEASE;
@@ -58,15 +58,16 @@ static int32_t rpmsg_ept_read_cb(void *payload, uint32_t payload_len, uint32_t s
 
 static void application_thread(void *arg1, void *arg2, void *arg3)
 {
-	ARG_UNUSED(arg1);
-	ARG_UNUSED(arg2);
-	ARG_UNUSED(arg3);
+    ARG_UNUSED(arg1);
+    ARG_UNUSED(arg2);
+    ARG_UNUSED(arg3);
 
-	gp_rpmsg_dev_inst = rpmsg_lite_remote_init(shared_memory, RPMSG_LITE_LINK_ID, RL_NO_FLAGS, &g_rpmsg_ctxt);
+    gp_rpmsg_dev_inst = rpmsg_lite_remote_init(shared_memory, RPMSG_LITE_LINK_ID, RL_NO_FLAGS, &g_rpmsg_ctxt);
 
-	rpmsg_lite_wait_for_link_up(gp_rpmsg_dev_inst, 600000);
+    rpmsg_lite_wait_for_link_up(gp_rpmsg_dev_inst, 600000);
 
-	gp_rpmsg_ept = rpmsg_lite_create_ept(gp_rpmsg_dev_inst, LOCAL_EPT_ADDR, rpmsg_ept_read_cb, (void *)&g_has_received, &g_ept_context);
+    gp_rpmsg_ept = rpmsg_lite_create_ept(gp_rpmsg_dev_inst, LOCAL_EPT_ADDR, rpmsg_ept_read_cb, (void *)&g_has_received,
+                                         &g_ept_context);
 
     while (g_msg.DATA <= 100U)
     {
@@ -74,7 +75,8 @@ static void application_thread(void *arg1, void *arg2, void *arg3)
         {
             g_has_received = 0;
             g_msg.DATA++;
-            (void)rpmsg_lite_send(gp_rpmsg_dev_inst, gp_rpmsg_ept, g_remote_addr, (char *)&g_msg, sizeof(THE_MESSAGE), RL_DONT_BLOCK);
+            (void)rpmsg_lite_send(gp_rpmsg_dev_inst, gp_rpmsg_ept, g_remote_addr, (char *)&g_msg, sizeof(THE_MESSAGE),
+                                  RL_DONT_BLOCK);
         }
     }
 
@@ -86,10 +88,9 @@ static void application_thread(void *arg1, void *arg2, void *arg3)
 
 int main(void)
 {
-	printk("Starting application thread on Remote Core!\n");
-	k_thread_create(&thread_data, thread_stack, APP_THREAD_STACK_SIZE,
-			application_thread,
-			NULL, NULL, NULL, K_PRIO_COOP(7), 0, K_NO_WAIT);
+    printk("Starting application thread on Remote Core!\n");
+    k_thread_create(&thread_data, thread_stack, APP_THREAD_STACK_SIZE, application_thread, NULL, NULL, NULL,
+                    K_PRIO_COOP(7), 0, K_NO_WAIT);
 
-	return 0;
+    return 0;
 }

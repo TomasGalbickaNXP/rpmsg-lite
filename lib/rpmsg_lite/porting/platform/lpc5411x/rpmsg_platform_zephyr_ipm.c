@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2021 NXP
+ * Copyright 2016-2023 NXP
  * All rights reserved.
  *
  *
@@ -24,7 +24,7 @@ static void *platform_lock;
 static LOCK_STATIC_CONTEXT platform_lock_static_ctxt;
 #endif
 static const struct device *const ipm_handle =
-	DEVICE_DT_GET(DT_CHOSEN(zephyr_ipc));
+    DEVICE_DT_GET(DT_CHOSEN(zephyr_ipc));
 
 void platform_ipm_callback(const struct device *dev, void *context, uint32_t id, volatile void *data)
 {

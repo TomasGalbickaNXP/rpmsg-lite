@@ -1,8 +1,5 @@
 /*
- * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2021 NXP
- * All rights reserved.
- *
+ * Copyright 2023 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -11,7 +8,6 @@
 
 #include "rpmsg_platform.h"
 #include "rpmsg_env.h"
-
 #include <zephyr/drivers/ipm.h>
 
 #if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
@@ -25,7 +21,7 @@ static void *platform_lock;
 static LOCK_STATIC_CONTEXT platform_lock_static_ctxt;
 #endif
 static const struct device *const ipm_handle =
-	DEVICE_DT_GET(DT_CHOSEN(zephyr_ipc));
+    DEVICE_DT_GET(DT_CHOSEN(zephyr_ipc));
 
 void platform_ipm_callback(const struct device *dev, void *context, uint32_t id, volatile void *data)
 {

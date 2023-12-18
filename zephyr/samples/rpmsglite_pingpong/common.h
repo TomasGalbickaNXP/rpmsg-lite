@@ -1,7 +1,7 @@
 /*
  * Copyright 2023 NXP
  *
- * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 #ifndef RPMSG_LITE_COMMON_H_

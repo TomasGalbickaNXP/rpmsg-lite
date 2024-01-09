@@ -1,8 +1,5 @@
 /*
- * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2023 NXP
- * All rights reserved.
- *
+ * Copyright 2023 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -87,7 +84,7 @@ void platform_notify(uint32_t vector_id)
 {
     switch (RL_GET_LINK_ID(vector_id))
     {
-        case RL_PLATFORM_LPC5411x_M4_M0_LINK_ID:
+        case RL_PLATFORM_LPC55S69_M33_M33_LINK_ID:
             env_lock_mutex(platform_lock);
             uint32_t data = (1 << RL_GET_Q_ID(vector_id));
             RL_ASSERT(ipm_handle);

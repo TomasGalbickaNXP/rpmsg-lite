@@ -7,6 +7,9 @@
 #include <string.h>
 
 #include "rpmsg_platform.h"
+#include "rpmsg_default_config.h"
+#include "rpmsg_lite.h"
+
 #include "rpmsg_env.h"
 
 #include "fsl_device_registers.h"
@@ -30,12 +33,31 @@
 #define APP_IMU_LINK kIMU_LinkCpu2Cpu1
 #endif
 
+/* Generator for CRC calculations. */
+#define POLGEN 0x1021U
+
 static int32_t isr_counter     = 0;
 static int32_t disable_counter = 0;
 static void *platform_lock;
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
 static LOCK_STATIC_CONTEXT platform_lock_static_ctxt;
 #endif
+
+/* This structure is used to validate that shmem config that is stored in SMU2 is valid */
+typedef struct rpmsg_platform_shmem_config_protected
+{
+    uint8_t identificationWord[10];
+    rpmsg_platform_shmem_config_t config;
+    uint16_t shmemConfigCrc;
+} rpmsg_platform_shmem_config_protected_t;
+
+static const uint8_t ShmemConfigIdentifier[12] = {"SMEM_CONFIG:"};
+
+/* Compute CRC to protect shared memory strcuture stored in RAM by application core and retrieve by NBU */
+static uint16_t platform_compute_crc_over_shmem_struct(rpmsg_platform_shmem_config_protected_t *protected_structure);
+
+static uint32_t first_time = RL_TRUE;
+static rpmsg_platform_shmem_config_t shmem_config = {0U};
 
 #if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
 static void mcmgr_event_handler(uint16_t vring_idx, void *context)
@@ -311,6 +333,7 @@ void *platform_patova(uintptr_t addr)
     return ((void *)(char *)((addr & 0x0000FFFFu) + 0xB0000000u));
 }
 #endif
+
 /**
  * platform_init
  *
@@ -358,4 +381,100 @@ int32_t platform_deinit(void)
     env_delete_mutex(platform_lock);
     platform_lock = ((void *)0);
     return 0;
+}
+
+void platform_set_static_shmem_config(void)
+{
+    extern uint32_t rpmsg_sh_mem_start[];
+    rpmsg_platform_shmem_config_protected_t protec_shmem_struct;
+
+    /* Identifier at the beginning of the structure that will be used to verify on nbu side validity of the structure */
+    memcpy(&(protec_shmem_struct.identificationWord),ShmemConfigIdentifier,sizeof(ShmemConfigIdentifier));
+
+    /* Fill shared memory structure with setting from the app core */
+    protec_shmem_struct.config.buffer_payload_size = RL_BUFFER_PAYLOAD_SIZE;
+    protec_shmem_struct.config.buffer_count = RL_BUFFER_COUNT;
+    protec_shmem_struct.config.vring_size = VRING_SIZE;
+    protec_shmem_struct.config.vring_align= VRING_ALIGN;
+
+    /* Calculate and set CRC of the strucuture */
+    protec_shmem_struct.shmemConfigCrc = platform_compute_crc_over_shmem_struct(&protec_shmem_struct);
+
+    /* Store in SMU2 the all structure */
+    memcpy(rpmsg_sh_mem_start, &protec_shmem_struct, sizeof(rpmsg_platform_shmem_config_protected_t));
+}
+
+uint32_t platform_get_custom_shmem_config(uint32_t link_id, rpmsg_platform_shmem_config_t *config)
+{
+    extern uint32_t rpmsg_sh_mem_start[];
+    rpmsg_platform_shmem_config_protected_t protec_shmem_struct = {0U};
+
+    do
+    {
+        if (first_time == RL_FALSE)
+        {
+            /* Variable shmem_config is already set if this is not the fisrt call */
+            break;
+        }
+
+        first_time = RL_FALSE;
+
+        /* Copy the full structure in local variable */
+        memcpy(&protec_shmem_struct, rpmsg_sh_mem_start, sizeof(rpmsg_platform_shmem_config_protected_t));
+
+        /* By default set the values of the MR3 connectivity release */
+        shmem_config.buffer_payload_size = 496U;
+        shmem_config.buffer_count = 4U;
+        shmem_config.vring_size = 0x80U;
+        shmem_config.vring_align = 0x10U;
+
+        if (memcmp(&(protec_shmem_struct.identificationWord),ShmemConfigIdentifier,sizeof(ShmemConfigIdentifier)) != 0U)
+        {
+            break;
+        }
+        if (platform_compute_crc_over_shmem_struct(&protec_shmem_struct) != protec_shmem_struct.shmemConfigCrc)
+        {
+            break;
+        }
+        /* If the identifier and the CRC are correct we can copy the shared memory config stored in SMU2 in local variable */
+        memcpy(&shmem_config, &(protec_shmem_struct.config), sizeof(rpmsg_platform_shmem_config_t));
+
+    } while(false);
+
+    memcpy(config, &shmem_config, sizeof(rpmsg_platform_shmem_config_t));
+
+    (void)link_id;
+
+    return 0U;
+}
+
+static uint16_t platform_compute_crc_over_shmem_struct(rpmsg_platform_shmem_config_protected_t *protec_shmem_struct)
+{
+    uint16_t computedCRC = 0U;
+    uint8_t  crcA;
+    uint8_t  byte = 0U;
+
+    uint8_t *ptr = (uint8_t *)(&protec_shmem_struct->config);
+    uint16_t len = (uint16_t)((uint32_t)(uint8_t *)(&protec_shmem_struct->shmemConfigCrc) -
+                              (uint32_t)(uint8_t *)(&protec_shmem_struct->config));
+    while (len != 0U)
+    {
+        byte = *ptr;
+        computedCRC ^= ((uint16_t)byte << 8U);
+        for (crcA = 8U; crcA != 0U; crcA--)
+        {
+            if ((computedCRC & 0x8000U) != 0U)
+            {
+                computedCRC <<= 1U;
+                computedCRC ^= POLGEN;
+            }
+            else
+            {
+                computedCRC <<= 1U;
+            }
+        }
+        --len;
+        ++ptr;
+    }
+    return computedCRC;
 }

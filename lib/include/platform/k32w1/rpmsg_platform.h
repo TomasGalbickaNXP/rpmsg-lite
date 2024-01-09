@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 NXP
+ * Copyright 2020-2022 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -8,6 +8,7 @@
 #define RPMSG_PLATFORM_H_
 
 #include <stdint.h>
+#include "virtio_ring.h"
 
 /*
  * No need to align the VRING as defined in Linux because k32w1 is not intended
@@ -38,8 +39,19 @@
 #define RL_GET_LINK_ID(id)              (((id)&0xFFFFFFFEU) >> 1U)
 #define RL_GET_Q_ID(id)                 ((id)&0x1U)
 
-#define RL_PLATFORM_IMXRT500_LINK_ID (0U)
-#define RL_PLATFORM_HIGHEST_LINK_ID  (0U)
+#define RL_PLATFORM_K32W1_LINK_ID   (0U)
+#define RL_PLATFORM_HIGHEST_LINK_ID (0U)
+
+
+typedef struct rpmsg_platform_shmem_config
+{
+    uint32_t buffer_payload_size; /* custom buffer payload size setting that overwrites RL_BUFFER_PAYLOAD_SIZE global
+                                     config, must be equal to (240, 496, 1008, ...) [2^n - 16] */
+    uint16_t buffer_count; /* custom buffer count setting that overwrites RL_BUFFER_COUNT global config, must be power
+                              of two (2, 4, ...) */
+    uint32_t vring_size;   /* custom vring size */
+    uint32_t vring_align;  /* custom vring alignment */
+} rpmsg_platform_shmem_config_t;
 
 /* platform interrupt related functions */
 int32_t platform_init_interrupt(uint32_t vector_id, void *isr_data);
@@ -62,5 +74,24 @@ void *platform_patova(uintptr_t addr);
 /* platform init/deinit */
 int32_t platform_init(void);
 int32_t platform_deinit(void);
+
+
+/*!
+ * \brief Set static shared memory configuration from application core in SMU2 to be accessible from nbu later.
+ *
+ */
+void platform_set_static_shmem_config(void);
+
+/*!
+ * \brief API used when RL_ALLOW_CUSTOM_SHMEM_CONFIG is set to 1 in rpmsg_lite.c.
+ * \details On this platform we set the macro on nbu side to take the same config of application core previously 
+ *          set in platform_set_static_shmem_config().
+ *
+ * \param[in] link_id NOT USED on this platform
+ * \param[out] *config shared memory configuration
+ *
+ * \return int 0 if success, other if error.
+ */
+uint32_t platform_get_custom_shmem_config(uint32_t link_id, rpmsg_platform_shmem_config_t *config);
 
 #endif /* RPMSG_PLATFORM_H_ */

@@ -57,12 +57,12 @@ void MU1_A_IRQHandler(void)
     if (((uint32_t)kMU_GenInt0Flag & flags) != 0UL)
     {
         MU_ClearStatusFlags(APP_M33_0_M33_1_MU, (uint32_t)kMU_GenInt0Flag);
-        env_isr(0);
+        env_isr(RL_PLATFORM_IMXRT700_M33_0_M33_1_COM_ID << 3);
     }
     if (((uint32_t)kMU_GenInt1Flag & flags) != 0UL)
     {
         MU_ClearStatusFlags(APP_M33_0_M33_1_MU, (uint32_t)kMU_GenInt1Flag);
-        env_isr(1);
+        env_isr((uint32_t)(0x01 | (RL_PLATFORM_IMXRT700_M33_0_M33_1_COM_ID << 3)));
     }
 }
 void MU4_A_IRQHandler(void)
@@ -72,12 +72,12 @@ void MU4_A_IRQHandler(void)
     if (((uint32_t)kMU_GenInt0Flag & flags) != 0UL)
     {
         MU_ClearStatusFlags(APP_M33_0_HIFI4_MU, (uint32_t)kMU_GenInt0Flag);
-        env_isr(0);
+        env_isr(RL_PLATFORM_IMXRT700_M33_0_HIFI4_COM_ID << 3);
     }
     if (((uint32_t)kMU_GenInt1Flag & flags) != 0UL)
     {
         MU_ClearStatusFlags(APP_M33_0_HIFI4_MU, (uint32_t)kMU_GenInt1Flag);
-        env_isr(1);
+        env_isr((uint32_t)(0x01 | (RL_PLATFORM_IMXRT700_M33_0_HIFI4_COM_ID << 3)));
     }
 }
 #elif defined(MIMXRT798S_cm33_core1_SERIES)
@@ -88,12 +88,12 @@ void MU1_B_IRQHandler(void)
     if (((uint32_t)kMU_GenInt0Flag & flags) != 0UL)
     {
         MU_ClearStatusFlags(APP_M33_1_M33_0_MU, (uint32_t)kMU_GenInt0Flag);
-        env_isr(0);
+        env_isr(RL_PLATFORM_IMXRT700_M33_0_M33_1_COM_ID << 3);
     }
     if (((uint32_t)kMU_GenInt1Flag & flags) != 0UL)
     {
         MU_ClearStatusFlags(APP_M33_1_M33_0_MU, (uint32_t)kMU_GenInt1Flag);
-        env_isr(1);
+        env_isr((uint32_t)(0x01 | (RL_PLATFORM_IMXRT700_M33_0_M33_1_COM_ID << 3)));
     }
 }
 void MU3_A_IRQHandler(void)
@@ -103,12 +103,12 @@ void MU3_A_IRQHandler(void)
     if (((uint32_t)kMU_GenInt0Flag & flags) != 0UL)
     {
         MU_ClearStatusFlags(APP_M33_1_HIFI1_MU, (uint32_t)kMU_GenInt0Flag);
-        env_isr(0);
+        env_isr(RL_PLATFORM_IMXRT700_M33_1_HIFI1_COM_ID << 3);
     }
     if (((uint32_t)kMU_GenInt1Flag & flags) != 0UL)
     {
         MU_ClearStatusFlags(APP_M33_1_HIFI1_MU, (uint32_t)kMU_GenInt1Flag);
-        env_isr(1);
+        env_isr((uint32_t)(0x01 | (RL_PLATFORM_IMXRT700_M33_1_HIFI1_COM_ID << 3)));
     }
 }
 #endif
@@ -141,9 +141,9 @@ int32_t platform_init_interrupt(uint32_t vector_id, void *isr_data)
                 if (isr_counter0 < 2)
                 {
 #if (defined(MIMXRT798S_cm33_core0_SERIES))
-                    MU_EnableInterrupts(APP_M33_0_M33_1_MU, MU_GI_INTR(1UL << vector_id));
+                    MU_EnableInterrupts(APP_M33_0_M33_1_MU, MU_GI_INTR(1UL << (RL_GET_Q_ID(vector_id))));
 #elif (defined(MIMXRT798S_cm33_core1_SERIES))
-                    MU_EnableInterrupts(APP_M33_1_M33_0_MU, MU_GI_INTR(1UL << vector_id));
+                    MU_EnableInterrupts(APP_M33_1_M33_0_MU, MU_GI_INTR(1UL << (RL_GET_Q_ID(vector_id))));
 #endif
                 }
                 isr_counter0++;
@@ -153,7 +153,7 @@ int32_t platform_init_interrupt(uint32_t vector_id, void *isr_data)
                 if (isr_counter1 < 2)
                 {
 #if (defined(MIMXRT798S_cm33_core0_SERIES))
-                    MU_EnableInterrupts(APP_M33_0_HIFI4_MU, MU_GI_INTR(1UL << vector_id));
+                    MU_EnableInterrupts(APP_M33_0_HIFI4_MU, MU_GI_INTR(1UL << (RL_GET_Q_ID(vector_id))));
 #endif
                 }
                 isr_counter1++;
@@ -163,7 +163,7 @@ int32_t platform_init_interrupt(uint32_t vector_id, void *isr_data)
                 if (isr_counter2 < 2)
                 {
 #if (defined(MIMXRT798S_cm33_core1_SERIES))
-                    MU_EnableInterrupts(APP_M33_1_HIFI1_MU, MU_GI_INTR(1UL << vector_id));
+                    MU_EnableInterrupts(APP_M33_1_HIFI1_MU, MU_GI_INTR(1UL << (RL_GET_Q_ID(vector_id))));
 #endif
                 }
                 isr_counter2++;
@@ -197,9 +197,9 @@ int32_t platform_deinit_interrupt(uint32_t vector_id)
                 if (isr_counter0 < 2)
                 {
 #if (defined(MIMXRT798S_cm33_core0_SERIES))
-                    MU_DisableInterrupts(APP_M33_0_M33_1_MU, MU_GI_INTR(1UL << vector_id));
+                    MU_DisableInterrupts(APP_M33_0_M33_1_MU, MU_GI_INTR(1UL << (RL_GET_Q_ID(vector_id))));
 #elif (defined(MIMXRT798S_cm33_core1_SERIES))
-                    MU_DisableInterrupts(APP_M33_1_M33_0_MU, MU_GI_INTR(1UL << vector_id));
+                    MU_DisableInterrupts(APP_M33_1_M33_0_MU, MU_GI_INTR(1UL << (RL_GET_Q_ID(vector_id))));
 #endif
                 }
                 break;
@@ -209,7 +209,7 @@ int32_t platform_deinit_interrupt(uint32_t vector_id)
                 if (isr_counter1 < 2)
                 {
 #if (defined(MIMXRT798S_cm33_core0_SERIES))
-                    MU_DisableInterrupts(APP_M33_0_HIFI4_MU, MU_GI_INTR(1UL << vector_id));
+                    MU_DisableInterrupts(APP_M33_0_HIFI4_MU, MU_GI_INTR(1UL << (RL_GET_Q_ID(vector_id))));
 #endif
                 }
                 break;
@@ -219,7 +219,7 @@ int32_t platform_deinit_interrupt(uint32_t vector_id)
                 if (isr_counter2 < 2)
                 {
 #if (defined(MIMXRT798S_cm33_core1_SERIES))
-                    MU_DisableInterrupts(APP_M33_1_HIFI1_MU, MU_GI_INTR(1UL << vector_id));
+                    MU_DisableInterrupts(APP_M33_1_HIFI1_MU, MU_GI_INTR(1UL << (RL_GET_Q_ID(vector_id))));
 #endif
                 }
                 break;

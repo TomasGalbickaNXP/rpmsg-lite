@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 NXP
+ * Copyright 2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -32,19 +32,19 @@ static void *platform_lock;
 static LOCK_STATIC_CONTEXT platform_lock_static_ctxt;
 #endif
 
-void MU_B_IRQHandler(void *arg)
+void MU3_B_IRQHandler(void *arg)
 {
     uint32_t flags;
-    flags = MU_GetStatusFlags(MUB);
+    flags = MU_GetStatusFlags(MU3_MUB);
     if (((uint32_t)kMU_GenInt0Flag & flags) != 0UL)
     {
-        MU_ClearStatusFlags(MUB, (uint32_t)kMU_GenInt0Flag);
-        env_isr(0);
+        MU_ClearStatusFlags(MU3_MUB, (uint32_t)kMU_GenInt0Flag);
+        env_isr(RL_PLATFORM_IMXRT700_M33_1_HIFI1_COM_ID << 3);
     }
     if (((uint32_t)kMU_GenInt1Flag & flags) != 0UL)
     {
-        MU_ClearStatusFlags(MUB, (uint32_t)kMU_GenInt1Flag);
-        env_isr(1);
+        MU_ClearStatusFlags(MU3_MUB, (uint32_t)kMU_GenInt1Flag);
+        env_isr((uint32_t)(0x01 | (RL_PLATFORM_IMXRT700_M33_1_HIFI1_COM_ID << 3)));
     }
 }
 
@@ -60,7 +60,7 @@ int32_t platform_init_interrupt(uint32_t vector_id, void *isr_data)
         RL_ASSERT(0 <= isr_counter);
         if (isr_counter < 2)
         {
-            MU_EnableInterrupts(MUB, 1UL << (31UL - vector_id));
+            MU_EnableInterrupts(MU3_MUB, MU_GI_INTR(1UL << (RL_GET_Q_ID(vector_id))));
         }
         isr_counter++;
 
@@ -83,7 +83,7 @@ int32_t platform_deinit_interrupt(uint32_t vector_id)
         isr_counter--;
         if (isr_counter < 2)
         {
-            MU_DisableInterrupts(MUB, 1UL << (31UL - vector_id));
+            MU_DisableInterrupts(MU3_MUB, MU_GI_INTR(1UL << (RL_GET_Q_ID(vector_id))));
         }
 
         /* Unregister ISR from environment layer */
@@ -102,7 +102,7 @@ int32_t platform_deinit_interrupt(uint32_t vector_id)
 void platform_notify(uint32_t vector_id)
 {
     env_lock_mutex(platform_lock);
-    (void)MU_TriggerInterrupts(MUB, 1UL << (19UL - RL_GET_Q_ID(vector_id)));
+    (void)MU_TriggerInterrupts(MU3_MUB, MU_GI_INTR(1UL << (RL_GET_Q_ID(vector_id))));
     env_unlock_mutex(platform_lock);
 }
 
@@ -248,6 +248,7 @@ void *platform_patova(uintptr_t addr)
  */
 int32_t platform_init(void)
 {
+    MU_Init(MU3_MUB);
     /* Create lock used in multi-instanced RPMsg */
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
     if (0 != env_create_mutex(&platform_lock, 1, &platform_lock_static_ctxt))
@@ -275,6 +276,7 @@ int32_t platform_init(void)
  */
 int32_t platform_deinit(void)
 {
+    MU_Deinit(MU3_MUB);
 #ifdef SDK_OS_BAREMETAL
     _xtos_set_interrupt_handler(6, ((void *)0));
 #else

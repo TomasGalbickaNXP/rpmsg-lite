@@ -74,7 +74,6 @@ void *platform_patova(uintptr_t addr);
 int32_t platform_init(void);
 int32_t platform_deinit(void);
 
-
 /*!
  * \brief Set static shared memory configuration from application core in SMU2 to be accessible from nbu later.
  *
@@ -83,7 +82,7 @@ void platform_set_static_shmem_config(void);
 
 /*!
  * \brief API used when RL_ALLOW_CUSTOM_SHMEM_CONFIG is set to 1 in rpmsg_lite.c.
- * \details On this platform we set the macro on nbu side to take the same config of application core previously 
+ * \details On this platform we set the macro on nbu side to take the same config of application core previously
  *          set in platform_set_static_shmem_config().
  *
  * \param[in] link_id NOT USED on this platform

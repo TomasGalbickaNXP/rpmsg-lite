@@ -335,7 +335,7 @@ static void *vq_tx_alloc_master(struct virtqueue *tvq, uint32_t *len, uint16_t *
 static void *vq_rx_master(struct virtqueue *rvq, uint32_t *len, uint16_t *idx)
 {
 #if (defined(MIMXRT798S_cm33_core0_SERIES))
-    XCACHE_CleanInvalidateCacheByRange((uint32_t)0x20000000, 6144U);
+    XCACHE_CleanInvalidateCacheByRange((uint32_t)0x20200000, 6144U);
 #endif
     return virtqueue_get_buffer(rvq, len, idx);
 }

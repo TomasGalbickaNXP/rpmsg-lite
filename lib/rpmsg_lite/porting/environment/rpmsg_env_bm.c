@@ -243,7 +243,7 @@ int32_t env_strncmp(char *dest, const char *src, uint32_t len)
 void env_mb(void)
 {
 #if (defined(MIMXRT798S_cm33_core0_SERIES))
-    XCACHE_CleanInvalidateCacheByRange((uint32_t)0x20000000, 6144U);
+    XCACHE_CleanInvalidateCacheByRange((uint32_t)0x20200000, 6144U);
 #endif
     MEM_BARRIER();
 }

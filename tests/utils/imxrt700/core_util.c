@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 NXP
+ * Copyright 2016-2022 NXP
  * All rights reserved.
  *
  *
@@ -7,28 +7,21 @@
  */
 
 #include "rpmsg_lite.h"
+#include "mcmgr.h"
 #include "fsl_device_registers.h"
 #include "fsl_common.h"
 #include "unity.h"
-#include "fsl_mu.h"
-#if defined(MUA)
 #include "board.h"
-#elif defined(MUB)
-#include "board_hifi4.h"
-#include <xtensa/config/core.h>
-#endif
 
 #include "app.h"
-#if defined(MUA)
-#include "dsp_support.h"
+#if defined(FSL_FEATURE_MAILBOX_SIDE_A)
+#include "mcmgr.h"
 #include "fsl_debug_console.h"
 #endif
 
 #if defined(SDK_OS_FREE_RTOS)
 #include "FreeRTOS.h"
 #include "task.h"
-#elif defined(FSL_RTOS_XOS)
-#include <xtensa/xos.h>
 #endif
 
 #define TEST_TASK_STACK_SIZE 400
@@ -56,18 +49,31 @@ __attribute__((noinline)) void CornBreakpointFunc(void)
 
 void run_test_suite(void *unused)
 {
+    BOARD_InitHardware();
 
-#if defined(MUA)
+#ifdef CORE1_IMAGE_COPY_TO_RAM
+    /* Calculate size of the image - not required on LPCExpresso. LPCExpresso copies image to RAM during startup
+     * automatically */
+    uint32_t core1_image_size;
+    core1_image_size = get_core1_image_size();
+    PRINTF("Copy Secondary core image to address: 0x%x, size: %d\r\n", (void *)(char *)CORE1_BOOT_ADDRESS, core1_image_size);
 
-    /* MUA init - must be called before BOARD_DSP_Init() otherwise the MUB on the DSP core is not enabled 
-     and the MU interrupt is not registerred correctly when the DSP core runs (writing to MUB registers
-     is not possible when the MUA is not initialized before). */
-    MU_Init(MUA);
+    /* Copy Secondary core application from FLASH to RAM. Primary core code is executed from FLASH, Secondary from RAM
+     * for maximal effectivity.*/
+    memcpy((void *)(char *)CORE1_BOOT_ADDRESS, (void *)CORE1_IMAGE_START, core1_image_size);
+    
+#ifdef APP_INVALIDATE_CACHE_FOR_SECONDARY_CORE_IMAGE_MEMORY
+    invalidate_cache_for_core1_image_memory(CORE1_BOOT_ADDRESS, core1_image_size);
+#endif /* APP_INVALIDATE_CACHE_FOR_SECONDARY_CORE_IMAGE_MEMORY */
+#endif /* CORE1_IMAGE_COPY_TO_RAM */
 
-    PRINTF("Starting Secondary core.\r\n");
+    /* Initialize MCMGR before calling its API */
+    MCMGR_Init();
 
-    /* Start dsp firmware */
-    BOARD_DSP_Init();
+#if !defined(FSL_FEATURE_MU_SIDE_B)
+
+    PRINTF("Starting Primary core.\r\n");
+    MCMGR_StartCore(kMCMGR_Core1, (void *)(char *)CORE1_BOOT_ADDRESS, 0, kMCMGR_Start_Asynchronous);
 
     /* Wait for remote side to come up. This delay is arbitrary and may
     * need adjustment for different configuration of remote systems */
@@ -86,9 +92,6 @@ void run_test_suite(void *unused)
 TaskHandle_t test_task_handle = NULL;
 int main(void)
 {
-    BOARD_InitHardware();
-
-#if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
     if (xTaskCreate(run_test_suite, "TEST_TASK", TEST_TASK_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1, &test_task_handle) != pdPASS)
     {
         (void)PRINTF("\r\nFailed to create application task\r\n");
@@ -96,26 +99,13 @@ int main(void)
         {
         }
     }
-#else
-    test_task_handle = xTaskCreateStatic(run_test_suite, "TEST_TASK", TEST_TASK_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1, xStack, &xTaskBuffer);
-#endif
 
     vTaskStartScheduler();
     return 0;
 }
-#elif defined(FSL_RTOS_XOS)
-int main(void)
-{
-    BOARD_InitHardware();
-
-    xos_start_main("main", 7, 0);
-    run_test_suite(NULL);
-    return 0;
-}
 #else
 int main(void)
 {
-    BOARD_InitHardware();
     run_test_suite(NULL);
     return 0;
 }

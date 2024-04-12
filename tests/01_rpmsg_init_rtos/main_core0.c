@@ -30,6 +30,13 @@ char rpmsg_lite_base[SH_MEM_TOTAL_SIZE] __attribute__((section(".noinit.$rpmsg_s
 #endif
 #endif /*SH_MEM_NOT_TAKEN_FROM_LINKER */
 
+#if defined(MIMXRT798S_cm33_core0_SERIES)
+/* For RT700 which has more LINK_IDs define as the last higher ID plus 1 */
+#define RPMSG_LITE_LINK_ID_INVALID (RL_PLATFORM_HIGHEST_LINK_ID+1)
+#else
+#define RPMSG_LITE_LINK_ID_INVALID (RPMSG_LITE_LINK_ID+1)
+#endif /* defined(MIMXRT798S_cm33_core0_SERIES) */
+
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
@@ -95,7 +102,7 @@ void tc_1_rpmsg_init()
                                       RL_NO_FLAGS);
     TEST_ASSERT_MESSAGE(RL_NULL == my_rpmsg, "init function with bad shmem_length param failed");
     /* Wrong link_id param */
-    my_rpmsg = rpmsg_lite_master_init(rpmsg_lite_base, SH_MEM_TOTAL_SIZE, RPMSG_LITE_LINK_ID+1,
+    my_rpmsg = rpmsg_lite_master_init(rpmsg_lite_base, SH_MEM_TOTAL_SIZE, RPMSG_LITE_LINK_ID_INVALID,
                                       RL_NO_FLAGS);
     TEST_ASSERT_MESSAGE(RL_NULL == my_rpmsg, "init function with bad link_id param failed");
     /* Wrong shmem_addr param */
@@ -108,7 +115,7 @@ void tc_1_rpmsg_init()
                                       RL_NO_FLAGS);
     TEST_ASSERT_MESSAGE(RL_NULL == my_rpmsg, "init function with bad shmem_length param failed");
     /* Wrong link_id param */
-    my_rpmsg = rpmsg_lite_master_init((void *)RPMSG_LITE_SHMEM_BASE, RPMSG_LITE_SHMEM_SIZE, RPMSG_LITE_LINK_ID+1,
+    my_rpmsg = rpmsg_lite_master_init((void *)RPMSG_LITE_SHMEM_BASE, RPMSG_LITE_SHMEM_SIZE, RPMSG_LITE_LINK_ID_INVALID,
                                       RL_NO_FLAGS);
     TEST_ASSERT_MESSAGE(RL_NULL == my_rpmsg, "init function with bad link_id param failed");
     /* Wrong shmem_addr param */

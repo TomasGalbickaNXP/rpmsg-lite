@@ -19,10 +19,10 @@
  * NOTE: this offset is only for TCM offset that share memory is in TCM */
 static int32_t vatopa_off = 0x300000;
 
-static int32_t isr_counter0 = 0; /* RL_PLATFORM_IMX943_M70_M331_USER_LINK_ID isr counter */
-static int32_t isr_counter1 = 0; /* RL_PLATFORM_IMX943_M71_M70_USER_LINK_ID isr counter */
-static int32_t isr_counter2 = 0; /* RL_PLATFORM_IMX943_M71_M331_USER_LINK_ID isr counter */
-static int32_t isr_counter3 = 0; /* RL_PLATFORM_IMX943_M71_M330_USER_LINK_ID isr counter */
+static int32_t isr_counter0 = 0;     /* RL_PLATFORM_IMX943_M70_M331_USER_LINK_ID isr counter */
+static int32_t isr_counter1 = 0;     /* RL_PLATFORM_IMX943_M71_M70_USER_LINK_ID isr counter */
+static int32_t isr_counter2 = 0;     /* RL_PLATFORM_IMX943_M71_M331_USER_LINK_ID isr counter */
+static int32_t isr_counter3 = 0;     /* RL_PLATFORM_IMX943_M71_M330_USER_LINK_ID isr counter */
 
 static int32_t disable_counter0 = 0; /* RL_PLATFORM_IMX943_M70_M331_USER_LINK_ID isr counter */
 static int32_t disable_counter1 = 0; /* RL_PLATFORM_IMX943_M71_M70_USER_LINK_ID isr counter */

@@ -13,7 +13,7 @@
  * MU's purpose is not hard-coded in the SoC
  * Two mu instances: MU15, MU2
  * Currently use MU1 for communication between M-Core(Cortex-M33) and A-Core(Cortex-A55)
- * use 
+ * use
  */
 #define RPMSG_LITE_M331_A55_MU      WAKEUP__MUI_A15__MUB
 #define RPMSG_LITE_M331_A55_MU_IRQn MU15_B_IRQn
@@ -21,13 +21,13 @@
 #define RPMSG_LITE_M331_M71_MU      NETC__MUA1__MUB
 #define RPMSG_LITE_M331_M71_MU_IRQn MU_E1_B_IRQn
 
-#define RPMSG_LITE_M330_M71_MU      MU7_MUB 
+#define RPMSG_LITE_M330_M71_MU      MU7_MUB
 #define RPMSG_LITE_M330_M71_MU_IRQn MU7_B_IRQn
 
 #define RPMSG_LITE_M331_M70_MU      NETC__MUA3__MUB
 #define RPMSG_LITE_M331_M70_MU_IRQn MU_E3_B_IRQn
 
-#define RPMSG_LITE_M330_M331_MU      MU8_MUB 
+#define RPMSG_LITE_M330_M331_MU      MU8_MUB
 #define RPMSG_LITE_M330_M331_MU_IRQn MU8_B_IRQn
 
 #define RPMSG_LITE_M331_M330_MU      MU8_MUA
@@ -74,7 +74,7 @@
  *
  * vring_size = vring_size(4, VRING_ALIGN) = size3 + size4 = 80 +46 = 126
  * RL_VRING_OVERHEAD = 2 * vring_size =  256bytes
- * RL_BUFFER_PAYLOAD_SIZE = 496 
+ * RL_BUFFER_PAYLOAD_SIZE = 496
  * memsize = 4 * (496 + 16) * 2 + 0x200 = 4K + 0.5K =4.5K
  * */
 

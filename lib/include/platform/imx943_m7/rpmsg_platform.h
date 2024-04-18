@@ -15,7 +15,7 @@
  * MUE1 for communication between M-Core(Cortex-M7-1) and M-Core(Cortex-M33-1)
  */
 #define RPMSG_LITE_M70_A55_MU      WAKEUP__MUI_A11__MUB
-#define RPMSG_LITE_M70_A55_MU_IRQn MU11_A_IRQn  /* MU11_B_IRQn????? */
+#define RPMSG_LITE_M70_A55_MU_IRQn MU11_A_IRQn /* MU11_B_IRQn????? */
 
 #define RPMSG_LITE_M70_M331_MU      NETC__MUA3__MUA
 #define RPMSG_LITE_M70_M331_MU_IRQn MU_E1_A_IRQn
@@ -29,7 +29,7 @@
 #define RPMSG_LITE_M71_M330_MU      MU7_MUA
 #define RPMSG_LITE_M71_M330_MU_IRQn MU7_A_IRQn
 
-#define RPMSG_LITE_M70_M71_MU      WAKEUP__MUI_A18__MUB 
+#define RPMSG_LITE_M70_M71_MU      WAKEUP__MUI_A18__MUB
 #define RPMSG_LITE_M70_M71_MU_IRQn MU18_B_IRQn
 #define RPMSG_LITE_M71_M70_MU      WAKEUP__MUI_A18__MUA
 #define RPMSG_LITE_M71_M70_MU_IRQn MU18_A_IRQn
@@ -75,7 +75,7 @@
  *
  * vring_size = vring_size(4, VRING_ALIGN) = size3 + size4 = 80 +46 = 126
  * RL_VRING_OVERHEAD = 2 * vring_size =  256bytes
- * RL_BUFFER_PAYLOAD_SIZE = 496 
+ * RL_BUFFER_PAYLOAD_SIZE = 496
  * memsize = 4 * (496 + 16) * 2 + 0x200 = 4K + 0.5K =4.5K
  * */
 
@@ -102,7 +102,6 @@
 
 #define RL_GEN_LINK_ID(com_id, vring_id) (((com_id) << 2U) | (vring_id))
 #define RL_GEN_MU_MSG(vq_id)             (uint32_t)(((vq_id)&0x7U) << 16U) /* com_id is discarded in msg */
-
 
 #define RL_PLATFORM_IMX943_M7_SRTM_VRING_ID (0U)
 #define RL_PLATFORM_IMX943_M7_USER_VRING_ID (1U)

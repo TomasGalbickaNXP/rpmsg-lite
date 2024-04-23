@@ -287,7 +287,8 @@ void responder_task(void)
                     {
                         ack_msg.CMD_ACK = CTR_CMD_CREATE_EP;
                         ack_msg.RETURN_VALUE = ret_value;
-                        env_memcpy((void *)ack_msg.RESP_DATA, (void *)&(my_ept->addr), sizeof(uint32_t));
+                        uint32_t resp_data = NULL != my_ept ? my_ept->addr : 0;
+                        env_memcpy((void *)ack_msg.RESP_DATA, (void *)&(resp_data), sizeof(uint32_t));
                         /* Send ack_msg to sender */
                         ret_value = rpmsg_lite_send(my_rpmsg, ctrl_ept, data_create_ept_param.ept_to_ack_addr,
                                                     (char *)&ack_msg, sizeof(ACKNOWLEDGE_MESSAGE), RL_BLOCK);

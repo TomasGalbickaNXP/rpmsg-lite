@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 NXP
+ * Copyright 2021-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -253,6 +253,16 @@ void platform_cache_all_flush_invalidate(void)
  *
  */
 void platform_cache_disable(void)
+{
+}
+
+/**
+ * platform_cache_invalidate
+ *
+ * Dummy implementation
+ *
+ */
+void platform_cache_invalidate(void *data, uint32_t len)
 {
 }
 

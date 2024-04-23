@@ -2,8 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2022 NXP
- * All rights reserved.
+ * Copyright 2022-2024 NXP
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -597,6 +596,11 @@ void env_disable_cache(void)
 {
     platform_cache_all_flush_invalidate();
     platform_cache_disable();
+}
+
+void env_invalidate_cache(void *data, uint32_t len)
+{
+    platform_cache_invalidate(data, len);
 }
 
 /*!

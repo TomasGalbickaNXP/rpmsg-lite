@@ -2,8 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2022 NXP
- * All rights reserved.
+ * Copyright 2016-2024 NXP
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -242,9 +241,6 @@ int32_t env_strncmp(char *dest, const char *src, uint32_t len)
  */
 void env_mb(void)
 {
-#if (defined(MIMXRT798S_cm33_core0_SERIES))
-    XCACHE_CleanInvalidateCacheByRange((uint32_t)0x20200000, 6144U);
-#endif
     MEM_BARRIER();
 }
 
@@ -432,6 +428,11 @@ void env_disable_cache(void)
 {
     platform_cache_all_flush_invalidate();
     platform_cache_disable();
+}
+
+void env_invalidate_cache(void *data, uint32_t len)
+{
+    platform_cache_invalidate(data, len);
 }
 
 /*========================================================= */

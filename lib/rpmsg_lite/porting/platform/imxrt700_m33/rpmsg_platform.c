@@ -11,6 +11,9 @@
 
 #include "fsl_device_registers.h"
 #include "fsl_mu.h"
+#if (defined(MIMXRT798S_cm33_core0_SERIES))
+#include "fsl_cache.h"
+#endif
 
 #if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
 #include "mcmgr.h"
@@ -456,6 +459,26 @@ void platform_cache_all_flush_invalidate(void)
  */
 void platform_cache_disable(void)
 {
+}
+
+/**
+ * platform_cache_invalidate
+ *
+ * Invalidates Cache.
+ *
+ * @param data Pointer to start of memory to invalidate
+ * @param len Length of memory to invalidate
+ *
+ */
+void platform_cache_invalidate(void *data, uint32_t len)
+{
+    if ((data == NULL) || (len == 0))
+    {
+        return;
+    }
+#if (defined(MIMXRT798S_cm33_core0_SERIES))
+    XCACHE_CleanInvalidateCacheByRange(*(uint32_t*)data, len);
+#endif
 }
 
 /**

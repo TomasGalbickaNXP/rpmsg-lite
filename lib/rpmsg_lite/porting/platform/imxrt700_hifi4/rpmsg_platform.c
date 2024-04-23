@@ -220,6 +220,16 @@ void platform_cache_disable(void)
 }
 
 /**
+ * platform_cache_invalidate
+ *
+ * Dummy implementation
+ *
+ */
+void platform_cache_invalidate(void *data, uint32_t len)
+{
+}
+
+/**
  * platform_vatopa
  *
  * Dummy implementation

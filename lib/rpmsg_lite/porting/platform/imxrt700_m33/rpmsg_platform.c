@@ -248,7 +248,7 @@ void platform_notify(uint32_t vector_id)
 {
     env_lock_mutex(platform_lock);
 #if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
-    (void)MCMGR_TriggerEvent(kMCMGR_RemoteRPMsgEvent, RL_GET_Q_ID(vector_id));
+    (void)MCMGR_TriggerEventForce(kMCMGR_RemoteRPMsgEvent, RL_GET_Q_ID(vector_id));
 #else
     switch (RL_GET_COM_ID(vector_id))
     {

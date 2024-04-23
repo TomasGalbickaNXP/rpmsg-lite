@@ -250,6 +250,9 @@ void *virtqueue_get_buffer(struct virtqueue *vq, uint32_t *len, uint16_t *idx)
     struct vring_used_elem *uep;
     uint16_t used_idx, desc_idx;
 
+    /* Invalidate used->idx before it is read */
+    VQUEUE_INVALIDATE(&vq->vq_ring.used->idx, sizeof(vq->vq_ring.used->idx));
+
     if ((vq == VQ_NULL) || (vq->vq_used_cons_idx == vq->vq_ring.used->idx))
     {
         return (VQ_NULL);
@@ -260,6 +263,10 @@ void *virtqueue_get_buffer(struct virtqueue *vq, uint32_t *len, uint16_t *idx)
     uep      = &vq->vq_ring.used->ring[used_idx];
 
     env_rmb();
+
+    /* Invalidate used->ring before it is read */
+	VQUEUE_INVALIDATE(&vq->vq_ring.used->ring[used_idx],
+			 sizeof(vq->vq_ring.used->ring[used_idx]));
 
     desc_idx = (uint16_t)uep->id;
     if (len != VQ_NULL)
@@ -293,6 +300,9 @@ void *virtqueue_get_buffer(struct virtqueue *vq, uint32_t *len, uint16_t *idx)
  */
 uint32_t virtqueue_get_buffer_length(struct virtqueue *vq, uint16_t idx)
 {
+    /* Invalidate used->ring before it is read */
+    VQUEUE_INVALIDATE(&vq->vq_ring.desc[idx].len,
+			 sizeof(vq->vq_ring.desc[idx].len));
     return vq->vq_ring.desc[idx].len;
 }
 
@@ -351,6 +361,8 @@ void *virtqueue_get_available_buffer(struct virtqueue *vq, uint16_t *avail_idx, 
     uint16_t head_idx = 0;
     void *buffer;
 
+    /* Invalidate avail->idx before it is read */
+    VQUEUE_INVALIDATE(&vq->vq_ring.avail->idx, sizeof(vq->vq_ring.avail->idx));
     if (vq->vq_available_idx == vq->vq_ring.avail->idx)
     {
         return (VQ_NULL);
@@ -359,6 +371,11 @@ void *virtqueue_get_available_buffer(struct virtqueue *vq, uint16_t *avail_idx, 
     VQUEUE_BUSY(vq, avail_read);
 
     head_idx   = (uint16_t)(vq->vq_available_idx++ & ((uint16_t)(vq->vq_nentries - 1U)));
+
+    /* Invalidate avail->ring before it is read */
+    VQUEUE_INVALIDATE(&vq->vq_ring.avail->ring[head_idx],
+			 sizeof(vq->vq_ring.avail->ring[head_idx]));
+
     *avail_idx = vq->vq_ring.avail->ring[head_idx];
 
     env_rmb();
@@ -457,11 +474,15 @@ void virtqueue_disable_cb(struct virtqueue *vq)
         /* coco begin validated: This part does not need to be tested because VIRTQUEUE_FLAG_EVENT_IDX is not being
          * utilized in rpmsg_lite implementation */
         vring_used_event(&vq->vq_ring) = vq->vq_used_cons_idx - vq->vq_nentries - 1U;
+        VQUEUE_FLUSH(&vring_used_event(&vq->vq_ring),
+				    sizeof(vring_used_event(&vq->vq_ring)));
     }
     /* coco end */
     else
     {
         vq->vq_ring.avail->flags |= (uint16_t)VRING_AVAIL_F_NO_INTERRUPT;
+        VQUEUE_FLUSH(&vq->vq_ring.avail->flags,
+				    sizeof(vq->vq_ring.avail->flags));
     }
 
     VQUEUE_IDLE(vq, avail_write);
@@ -501,6 +522,9 @@ void virtqueue_dump(struct virtqueue *vq)
     {
         return;
     }
+    /* Invalidate avail and used before read */
+    VQUEUE_INVALIDATE(&vq->vq_ring.avail, sizeof(vq->vq_ring.avail));
+	VQUEUE_INVALIDATE(&vq->vq_ring.used, sizeof(vq->vq_ring.used));
 
     env_print(
         "VQ: %s - size=%d; used=%d; queued=%d; "
@@ -527,13 +551,26 @@ uint32_t virtqueue_get_desc_size(struct virtqueue *vq)
     uint16_t avail_idx;
     uint32_t len;
 
+    /* Invalidate avail->idx before read */
+    VQUEUE_INVALIDATE(&vq->vq_ring.avail->idx, sizeof(vq->vq_ring.avail->idx));
+
     if (vq->vq_available_idx == vq->vq_ring.avail->idx)
     {
         return 0;
     }
 
     head_idx  = (uint16_t)(vq->vq_available_idx & ((uint16_t)(vq->vq_nentries - 1U)));
+
+    /* Invalidate avail->ring before read */
+    VQUEUE_INVALIDATE(&vq->vq_ring.avail->ring[head_idx],
+			 sizeof(vq->vq_ring.avail->ring[head_idx]));
+
     avail_idx = vq->vq_ring.avail->ring[head_idx];
+
+    /* Invalidate len before read */
+    VQUEUE_INVALIDATE(&vq->vq_ring.desc[avail_idx].len,
+			 sizeof(vq->vq_ring.desc[avail_idx].len));
+
     len       = vq->vq_ring.desc[avail_idx].len;
 
     return (len);
@@ -571,6 +608,9 @@ static uint16_t vq_ring_add_buffer(
 #endif
     dp->len   = length;
     dp->flags = VRING_DESC_F_WRITE;
+
+    /* Flush desc after write */
+    VQUEUE_FLUSH(&desc[head_idx], sizeof(desc[head_idx]));
 
     return (head_idx + 1U);
 }
@@ -614,7 +654,14 @@ static void vq_ring_update_avail(struct virtqueue *vq, uint16_t desc_idx)
     avail_idx                          = (uint16_t)(vq->vq_ring.avail->idx & ((uint16_t)(vq->vq_nentries - 1U)));
     vq->vq_ring.avail->ring[avail_idx] = desc_idx;
 
+    /* Flush avail->ring after write */
+    VQUEUE_FLUSH(&vq->vq_ring.avail->ring[avail_idx],
+		    sizeof(vq->vq_ring.avail->ring[avail_idx]));
+
     env_wmb();
+
+    /* Flush idx after write */
+    VQUEUE_FLUSH(&vq->vq_ring.avail->idx, sizeof(vq->vq_ring.avail->idx));
 
     vq->vq_ring.avail->idx++;
 
@@ -644,9 +691,16 @@ static void vq_ring_update_used(struct virtqueue *vq, uint16_t head_idx, uint32_
     used_desc->id  = head_idx;
     used_desc->len = len;
 
+    /* Flush used->ring after write */
+    VQUEUE_FLUSH(&(vq->vq_ring.used->ring[used_idx]),
+		    sizeof(vq->vq_ring.used->ring[used_idx]));
+
     env_wmb();
 
     vq->vq_ring.used->idx++;
+
+    /* Flush used->idx after write */
+    VQUEUE_FLUSH(&vq->vq_ring.used->idx, sizeof(vq->vq_ring.used->idx));
 }
 
 /*!
@@ -665,10 +719,14 @@ static int32_t vq_ring_enable_interrupt(struct virtqueue *vq, uint16_t ndesc)
     if ((vq->vq_flags & VIRTQUEUE_FLAG_EVENT_IDX) != 0UL)
     {
         vring_used_event(&vq->vq_ring) = vq->vq_used_cons_idx + ndesc;
+        VQUEUE_FLUSH(&vring_used_event(&vq->vq_ring),
+				    sizeof(vring_used_event(&vq->vq_ring)));
     }
     else
     {
         vq->vq_ring.avail->flags &= ~(uint16_t)VRING_AVAIL_F_NO_INTERRUPT;
+        VQUEUE_FLUSH(&vq->vq_ring.avail->flags,
+				    sizeof(vq->vq_ring.avail->flags));
     }
 
     env_mb();
@@ -719,12 +777,17 @@ static int32_t vq_ring_must_notify_host(struct virtqueue *vq)
          * utilized in rpmsg_lite implementation */
         new_idx   = vq->vq_ring.avail->idx;
         prev_idx  = new_idx - vq->vq_queued_cnt;
+        VQUEUE_INVALIDATE(&vring_avail_event(&vq->vq_ring),
+					 sizeof(vring_avail_event(&vq->vq_ring)));
         event_idx = (uint16_t)vring_avail_event(&vq->vq_ring);
 
         return ((vring_need_event(event_idx, new_idx, prev_idx) != 0) ? 1 : 0);
     }
     /* coco end */
 
+    /* Invalidate flags before read */
+    VQUEUE_INVALIDATE(&vq->vq_ring.used->flags,
+					 sizeof(vq->vq_ring.used->flags));
     return (((vq->vq_ring.used->flags & ((uint16_t)VRING_USED_F_NO_NOTIFY)) == 0U) ? 1 : 0);
 }
 
@@ -752,6 +815,8 @@ static uint16_t virtqueue_nused(struct virtqueue *vq)
      * implementation */
     uint16_t used_idx, nused;
 
+    /* Invalidate used-idx before read */
+    VQUEUE_INVALIDATE(&vq->vq_ring.used->idx, sizeof(vq->vq_ring.used->idx));
     used_idx = vq->vq_ring.used->idx;
 
     nused = (uint16_t)(used_idx - vq->vq_used_cons_idx);

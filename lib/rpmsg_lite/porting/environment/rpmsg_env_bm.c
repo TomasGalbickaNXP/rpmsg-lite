@@ -430,9 +430,18 @@ void env_disable_cache(void)
     platform_cache_disable();
 }
 
-void env_invalidate_cache(void *data, uint32_t len)
+void env_cache_flush(void *data, uint32_t len)
 {
+#if defined(RL_USE_DCACHE) && (RL_USE_DCACHE == 1)
+    platform_cache_flush(data, len);
+#endif
+}
+
+void env_cache_invalidate(void *data, uint32_t len)
+{
+#if defined(RL_USE_DCACHE) && (RL_USE_DCACHE == 1)
     platform_cache_invalidate(data, len);
+#endif
 }
 
 /*========================================================= */

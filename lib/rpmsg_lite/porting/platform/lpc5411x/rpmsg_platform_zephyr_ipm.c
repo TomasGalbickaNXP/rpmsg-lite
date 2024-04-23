@@ -195,9 +195,19 @@ void platform_cache_disable(void)
 }
 
 /**
+ * platform_cache_flush
+ *
+ * Empty implementation
+ *
+ */
+void platform_cache_flush(void *data, uint32_t len)
+{
+}
+
+/**
  * platform_cache_invalidate
  *
- * Dummy implementation
+ * Empty implementation
  *
  */
 void platform_cache_invalidate(void *data, uint32_t len)

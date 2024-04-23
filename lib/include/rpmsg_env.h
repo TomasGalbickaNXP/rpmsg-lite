@@ -476,12 +476,20 @@ uint64_t env_get_timestamp(void);
 void env_disable_cache(void);
 
 /*!
- * env_invalidate_cache
+ * env_cache_flush
+ *
+ * Flushes system caches.
+ *
+ */
+void env_cache_flush(void *data, uint32_t len);
+
+/*!
+ * env_cache_invalidate
  *
  * Invalidates system caches.
  *
  */
-void env_invalidate_cache(void *data, uint32_t len);
+void env_cache_invalidate(void *data, uint32_t len);
 
 typedef void LOCK;
 

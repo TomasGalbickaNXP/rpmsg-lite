@@ -49,7 +49,6 @@ __attribute__((noinline)) void CornBreakpointFunc(void)
 
 void run_test_suite(void *unused)
 {
-    BOARD_InitHardware();
 
 #ifdef CORE1_IMAGE_COPY_TO_RAM
     /* Calculate size of the image - not required on LPCExpresso. LPCExpresso copies image to RAM during startup
@@ -92,6 +91,8 @@ void run_test_suite(void *unused)
 TaskHandle_t test_task_handle = NULL;
 int main(void)
 {
+    BOARD_InitHardware();
+
     if (xTaskCreate(run_test_suite, "TEST_TASK", TEST_TASK_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1, &test_task_handle) != pdPASS)
     {
         (void)PRINTF("\r\nFailed to create application task\r\n");
@@ -106,6 +107,8 @@ int main(void)
 #else
 int main(void)
 {
+    BOARD_InitHardware();
+
     run_test_suite(NULL);
     return 0;
 }

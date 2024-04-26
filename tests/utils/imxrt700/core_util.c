@@ -39,28 +39,28 @@ void tearDown(void)
 /* This function is used for the Corn test automation framework
    to breakpoint/stop the execution and to capture results
    from the memory. It must be ensured that it will never be inlined
-   and optimized to allow proper address recognition and breakpoint 
+   and optimized to allow proper address recognition and breakpoint
    placement during the Corn execution. */
 __attribute__((noinline)) void CornBreakpointFunc(void)
 {
-    volatile int i=0;
+    volatile int i = 0;
     i++;
 }
 
 void run_test_suite(void *unused)
 {
-
 #ifdef CORE1_IMAGE_COPY_TO_RAM
     /* Calculate size of the image - not required on LPCExpresso. LPCExpresso copies image to RAM during startup
      * automatically */
     uint32_t core1_image_size;
     core1_image_size = get_core1_image_size();
-    PRINTF("Copy Secondary core image to address: 0x%x, size: %d\r\n", (void *)(char *)CORE1_BOOT_ADDRESS, core1_image_size);
+    PRINTF("Copy Secondary core image to address: 0x%x, size: %d\r\n", (void *)(char *)CORE1_BOOT_ADDRESS,
+           core1_image_size);
 
     /* Copy Secondary core application from FLASH to RAM. Primary core code is executed from FLASH, Secondary from RAM
      * for maximal effectivity.*/
     memcpy((void *)(char *)CORE1_BOOT_ADDRESS, (void *)CORE1_IMAGE_START, core1_image_size);
-    
+
 #ifdef APP_INVALIDATE_CACHE_FOR_SECONDARY_CORE_IMAGE_MEMORY
     invalidate_cache_for_core1_image_memory(CORE1_BOOT_ADDRESS, core1_image_size);
 #endif /* APP_INVALIDATE_CACHE_FOR_SECONDARY_CORE_IMAGE_MEMORY */
@@ -75,7 +75,7 @@ void run_test_suite(void *unused)
     MCMGR_StartCore(kMCMGR_Core1, (void *)(char *)CORE1_BOOT_ADDRESS, 0, kMCMGR_Start_Asynchronous);
 
     /* Wait for remote side to come up. This delay is arbitrary and may
-    * need adjustment for different configuration of remote systems */
+     * need adjustment for different configuration of remote systems */
     env_sleep_msec(1000);
 #endif
 
@@ -93,7 +93,8 @@ int main(void)
 {
     BOARD_InitHardware();
 
-    if (xTaskCreate(run_test_suite, "TEST_TASK", TEST_TASK_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1, &test_task_handle) != pdPASS)
+    if (xTaskCreate(run_test_suite, "TEST_TASK", TEST_TASK_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1, &test_task_handle) !=
+        pdPASS)
     {
         (void)PRINTF("\r\nFailed to create application task\r\n");
         for (;;)

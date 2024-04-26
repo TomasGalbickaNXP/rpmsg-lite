@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2023 NXP
+ * Copyright 2016-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -169,11 +169,11 @@ int32_t ts_init_rpmsg(void)
     // Correct call
     ctrl_ept = rpmsg_lite_create_ept(my_rpmsg, TC_LOCAL_EPT_ADDR, rpmsg_queue_rx_cb, ctrl_q);
     TEST_ASSERT_MESSAGE(NULL != ctrl_ept, "'rpmsg_lite_create_ept' failed");
-    
+
     // Invalid params for rpmsg_ns_bind
     ns_handle = rpmsg_ns_bind(my_rpmsg, RL_NULL, (void *)&remote_addr);
     TEST_ASSERT_MESSAGE(RL_NULL == ns_handle, "'rpmsg_ns_bind' with bad app_cb param failed");
-    
+
     return 0;
 }
 

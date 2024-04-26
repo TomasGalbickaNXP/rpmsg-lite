@@ -234,9 +234,9 @@ static void vq_tx_remote(struct virtqueue *tvq, void *buffer, uint32_t len, uint
 static void *vq_tx_alloc_remote(struct virtqueue *tvq, uint32_t *len, uint16_t *idx)
 {
     void *data = NULL;
-    
+
     data = virtqueue_get_available_buffer(tvq, idx, len);
-    if (data) 
+    if (data)
     {
         env_cache_invalidate(data, *len);
     }
@@ -257,13 +257,13 @@ static void *vq_tx_alloc_remote(struct virtqueue *tvq, uint32_t *len, uint16_t *
 static void *vq_rx_remote(struct virtqueue *rvq, uint32_t *len, uint16_t *idx)
 {
     void *data = NULL;
-    
+
     data = virtqueue_get_available_buffer(rvq, idx, len);
-    if (data) 
+    if (data)
     {
         env_cache_invalidate(data, *len);
     }
-    
+
     return data;
 }
 
@@ -366,7 +366,7 @@ static void *vq_rx_master(struct virtqueue *rvq, uint32_t *len, uint16_t *idx)
 
     data = virtqueue_get_buffer(rvq, len, idx);
 
-    if(data)
+    if (data)
     {
         env_cache_invalidate(data, *len);
     }

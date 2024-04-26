@@ -23,16 +23,16 @@
 #error "This RPMsg-Lite port requires RL_USE_ENVIRONMENT_CONTEXT set to 0"
 #endif
 
-#define APP_M33_0_M33_1_MU         MU1_MUA
-#define APP_M33_0_M33_1_MU_IRQn    MU1_A_IRQn
-#define APP_M33_1_M33_0_MU         MU1_MUB
-#define APP_M33_1_M33_0_MU_IRQn    MU1_B_IRQn
-#define APP_M33_0_HIFI4_MU         MU4_MUA
-#define APP_M33_0_HIFI4_MU_IRQn    MU4_A_IRQn
-#define APP_M33_1_HIFI1_MU         MU3_MUA
-#define APP_M33_1_HIFI1_MU_IRQn    MU3_A_IRQn
+#define APP_M33_0_M33_1_MU      MU1_MUA
+#define APP_M33_0_M33_1_MU_IRQn MU1_A_IRQn
+#define APP_M33_1_M33_0_MU      MU1_MUB
+#define APP_M33_1_M33_0_MU_IRQn MU1_B_IRQn
+#define APP_M33_0_HIFI4_MU      MU4_MUA
+#define APP_M33_0_HIFI4_MU_IRQn MU4_A_IRQn
+#define APP_M33_1_HIFI1_MU      MU3_MUA
+#define APP_M33_1_HIFI1_MU_IRQn MU3_A_IRQn
 
-#define APP_MU_IRQ_PRIORITY         (3U)
+#define APP_MU_IRQ_PRIORITY (3U)
 static int32_t isr_counter0 = 0; /* RL_PLATFORM_IMXRT700_M33_0_M33_1_LINK_ID isr counter */
 static int32_t isr_counter1 = 0; /* RL_PLATFORM_IMXRT700_M33_0_HIFI4_LINK_ID isr counter */
 static int32_t isr_counter2 = 0; /* RL_PLATFORM_IMXRT700_M33_1_HIFI1_LINK_ID isr counter */
@@ -479,7 +479,7 @@ void platform_cache_flush(void *data, uint32_t len)
 
     /* Cache is handled only on core0 */
 #if (defined(MIMXRT798S_cm33_core0_SERIES))
-    XCACHE_CleanCacheByRange(*(uint32_t*)data, len);
+    XCACHE_CleanCacheByRange(*(uint32_t *)data, len);
 #endif
 }
 
@@ -501,7 +501,7 @@ void platform_cache_invalidate(void *data, uint32_t len)
 
     /* Cache is handled only on core0 */
 #if (defined(MIMXRT798S_cm33_core0_SERIES))
-    XCACHE_InvalidateCacheByRange(*(uint32_t*)data, len);
+    XCACHE_InvalidateCacheByRange(*(uint32_t *)data, len);
 #endif
 }
 

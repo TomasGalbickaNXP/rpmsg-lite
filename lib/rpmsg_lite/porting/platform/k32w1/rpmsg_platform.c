@@ -56,7 +56,7 @@ static const uint8_t ShmemConfigIdentifier[12] = {"SMEM_CONFIG:"};
 /* Compute CRC to protect shared memory strcuture stored in RAM by application core and retrieve by NBU */
 static uint16_t platform_compute_crc_over_shmem_struct(rpmsg_platform_shmem_config_protected_t *protected_structure);
 
-static uint32_t first_time = RL_TRUE;
+static uint32_t first_time                        = RL_TRUE;
 static rpmsg_platform_shmem_config_t shmem_config = {0U};
 
 #if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
@@ -409,13 +409,13 @@ void platform_set_static_shmem_config(void)
     rpmsg_platform_shmem_config_protected_t protec_shmem_struct;
 
     /* Identifier at the beginning of the structure that will be used to verify on nbu side validity of the structure */
-    memcpy(&(protec_shmem_struct.identificationWord),ShmemConfigIdentifier,sizeof(ShmemConfigIdentifier));
+    memcpy(&(protec_shmem_struct.identificationWord), ShmemConfigIdentifier, sizeof(ShmemConfigIdentifier));
 
     /* Fill shared memory structure with setting from the app core */
     protec_shmem_struct.config.buffer_payload_size = RL_BUFFER_PAYLOAD_SIZE;
-    protec_shmem_struct.config.buffer_count = RL_BUFFER_COUNT;
-    protec_shmem_struct.config.vring_size = VRING_SIZE;
-    protec_shmem_struct.config.vring_align= VRING_ALIGN;
+    protec_shmem_struct.config.buffer_count        = RL_BUFFER_COUNT;
+    protec_shmem_struct.config.vring_size          = VRING_SIZE;
+    protec_shmem_struct.config.vring_align         = VRING_ALIGN;
 
     /* Calculate and set CRC of the strucuture */
     protec_shmem_struct.shmemConfigCrc = platform_compute_crc_over_shmem_struct(&protec_shmem_struct);
@@ -444,11 +444,12 @@ uint32_t platform_get_custom_shmem_config(uint32_t link_id, rpmsg_platform_shmem
 
         /* By default set the values of the MR3 connectivity release */
         shmem_config.buffer_payload_size = 496U;
-        shmem_config.buffer_count = 4U;
-        shmem_config.vring_size = 0x80U;
-        shmem_config.vring_align = 0x10U;
+        shmem_config.buffer_count        = 4U;
+        shmem_config.vring_size          = 0x80U;
+        shmem_config.vring_align         = 0x10U;
 
-        if (memcmp(&(protec_shmem_struct.identificationWord),ShmemConfigIdentifier,sizeof(ShmemConfigIdentifier)) != 0U)
+        if (memcmp(&(protec_shmem_struct.identificationWord), ShmemConfigIdentifier, sizeof(ShmemConfigIdentifier)) !=
+            0U)
         {
             break;
         }
@@ -456,10 +457,11 @@ uint32_t platform_get_custom_shmem_config(uint32_t link_id, rpmsg_platform_shmem
         {
             break;
         }
-        /* If the identifier and the CRC are correct we can copy the shared memory config stored in SMU2 in local variable */
+        /* If the identifier and the CRC are correct we can copy the shared memory config stored in SMU2 in local
+         * variable */
         memcpy(&shmem_config, &(protec_shmem_struct.config), sizeof(rpmsg_platform_shmem_config_t));
 
-    } while(false);
+    } while (false);
 
     memcpy(config, &shmem_config, sizeof(rpmsg_platform_shmem_config_t));
 
@@ -471,8 +473,8 @@ uint32_t platform_get_custom_shmem_config(uint32_t link_id, rpmsg_platform_shmem
 static uint16_t platform_compute_crc_over_shmem_struct(rpmsg_platform_shmem_config_protected_t *protec_shmem_struct)
 {
     uint16_t computedCRC = 0U;
-    uint8_t  crcA;
-    uint8_t  byte = 0U;
+    uint8_t crcA;
+    uint8_t byte = 0U;
 
     uint8_t *ptr = (uint8_t *)(&protec_shmem_struct->config);
     uint16_t len = (uint16_t)((uint32_t)(uint8_t *)(&protec_shmem_struct->shmemConfigCrc) -

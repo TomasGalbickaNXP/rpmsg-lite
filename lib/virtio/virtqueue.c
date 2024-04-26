@@ -1,7 +1,7 @@
 /*-
  * Copyright (c) 2011, Bryan Venteicher <bryanv@FreeBSD.org>
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2019 NXP
+ * Copyright 2016-2024 NXP
  * All rights reserved.
  *
  *
@@ -265,8 +265,7 @@ void *virtqueue_get_buffer(struct virtqueue *vq, uint32_t *len, uint16_t *idx)
     env_rmb();
 
     /* Invalidate used->ring before it is read */
-	VQUEUE_INVALIDATE(&vq->vq_ring.used->ring[used_idx],
-			 sizeof(vq->vq_ring.used->ring[used_idx]));
+    VQUEUE_INVALIDATE(&vq->vq_ring.used->ring[used_idx], sizeof(vq->vq_ring.used->ring[used_idx]));
 
     desc_idx = (uint16_t)uep->id;
     if (len != VQ_NULL)
@@ -301,8 +300,7 @@ void *virtqueue_get_buffer(struct virtqueue *vq, uint32_t *len, uint16_t *idx)
 uint32_t virtqueue_get_buffer_length(struct virtqueue *vq, uint16_t idx)
 {
     /* Invalidate used->ring before it is read */
-    VQUEUE_INVALIDATE(&vq->vq_ring.desc[idx].len,
-			 sizeof(vq->vq_ring.desc[idx].len));
+    VQUEUE_INVALIDATE(&vq->vq_ring.desc[idx].len, sizeof(vq->vq_ring.desc[idx].len));
     return vq->vq_ring.desc[idx].len;
 }
 
@@ -370,11 +368,10 @@ void *virtqueue_get_available_buffer(struct virtqueue *vq, uint16_t *avail_idx, 
 
     VQUEUE_BUSY(vq, avail_read);
 
-    head_idx   = (uint16_t)(vq->vq_available_idx++ & ((uint16_t)(vq->vq_nentries - 1U)));
+    head_idx = (uint16_t)(vq->vq_available_idx++ & ((uint16_t)(vq->vq_nentries - 1U)));
 
     /* Invalidate avail->ring before it is read */
-    VQUEUE_INVALIDATE(&vq->vq_ring.avail->ring[head_idx],
-			 sizeof(vq->vq_ring.avail->ring[head_idx]));
+    VQUEUE_INVALIDATE(&vq->vq_ring.avail->ring[head_idx], sizeof(vq->vq_ring.avail->ring[head_idx]));
 
     *avail_idx = vq->vq_ring.avail->ring[head_idx];
 
@@ -474,15 +471,13 @@ void virtqueue_disable_cb(struct virtqueue *vq)
         /* coco begin validated: This part does not need to be tested because VIRTQUEUE_FLAG_EVENT_IDX is not being
          * utilized in rpmsg_lite implementation */
         vring_used_event(&vq->vq_ring) = vq->vq_used_cons_idx - vq->vq_nentries - 1U;
-        VQUEUE_FLUSH(&vring_used_event(&vq->vq_ring),
-				    sizeof(vring_used_event(&vq->vq_ring)));
+        VQUEUE_FLUSH(&vring_used_event(&vq->vq_ring), sizeof(vring_used_event(&vq->vq_ring)));
     }
     /* coco end */
     else
     {
         vq->vq_ring.avail->flags |= (uint16_t)VRING_AVAIL_F_NO_INTERRUPT;
-        VQUEUE_FLUSH(&vq->vq_ring.avail->flags,
-				    sizeof(vq->vq_ring.avail->flags));
+        VQUEUE_FLUSH(&vq->vq_ring.avail->flags, sizeof(vq->vq_ring.avail->flags));
     }
 
     VQUEUE_IDLE(vq, avail_write);
@@ -524,7 +519,7 @@ void virtqueue_dump(struct virtqueue *vq)
     }
     /* Invalidate avail and used before read */
     VQUEUE_INVALIDATE(&vq->vq_ring.avail, sizeof(vq->vq_ring.avail));
-	VQUEUE_INVALIDATE(&vq->vq_ring.used, sizeof(vq->vq_ring.used));
+    VQUEUE_INVALIDATE(&vq->vq_ring.used, sizeof(vq->vq_ring.used));
 
     env_print(
         "VQ: %s - size=%d; used=%d; queued=%d; "
@@ -559,19 +554,17 @@ uint32_t virtqueue_get_desc_size(struct virtqueue *vq)
         return 0;
     }
 
-    head_idx  = (uint16_t)(vq->vq_available_idx & ((uint16_t)(vq->vq_nentries - 1U)));
+    head_idx = (uint16_t)(vq->vq_available_idx & ((uint16_t)(vq->vq_nentries - 1U)));
 
     /* Invalidate avail->ring before read */
-    VQUEUE_INVALIDATE(&vq->vq_ring.avail->ring[head_idx],
-			 sizeof(vq->vq_ring.avail->ring[head_idx]));
+    VQUEUE_INVALIDATE(&vq->vq_ring.avail->ring[head_idx], sizeof(vq->vq_ring.avail->ring[head_idx]));
 
     avail_idx = vq->vq_ring.avail->ring[head_idx];
 
     /* Invalidate len before read */
-    VQUEUE_INVALIDATE(&vq->vq_ring.desc[avail_idx].len,
-			 sizeof(vq->vq_ring.desc[avail_idx].len));
+    VQUEUE_INVALIDATE(&vq->vq_ring.desc[avail_idx].len, sizeof(vq->vq_ring.desc[avail_idx].len));
 
-    len       = vq->vq_ring.desc[avail_idx].len;
+    len = vq->vq_ring.desc[avail_idx].len;
 
     return (len);
 }
@@ -655,8 +648,7 @@ static void vq_ring_update_avail(struct virtqueue *vq, uint16_t desc_idx)
     vq->vq_ring.avail->ring[avail_idx] = desc_idx;
 
     /* Flush avail->ring after write */
-    VQUEUE_FLUSH(&vq->vq_ring.avail->ring[avail_idx],
-		    sizeof(vq->vq_ring.avail->ring[avail_idx]));
+    VQUEUE_FLUSH(&vq->vq_ring.avail->ring[avail_idx], sizeof(vq->vq_ring.avail->ring[avail_idx]));
 
     env_wmb();
 
@@ -692,8 +684,7 @@ static void vq_ring_update_used(struct virtqueue *vq, uint16_t head_idx, uint32_
     used_desc->len = len;
 
     /* Flush used->ring after write */
-    VQUEUE_FLUSH(&(vq->vq_ring.used->ring[used_idx]),
-		    sizeof(vq->vq_ring.used->ring[used_idx]));
+    VQUEUE_FLUSH(&(vq->vq_ring.used->ring[used_idx]), sizeof(vq->vq_ring.used->ring[used_idx]));
 
     env_wmb();
 
@@ -719,14 +710,12 @@ static int32_t vq_ring_enable_interrupt(struct virtqueue *vq, uint16_t ndesc)
     if ((vq->vq_flags & VIRTQUEUE_FLAG_EVENT_IDX) != 0UL)
     {
         vring_used_event(&vq->vq_ring) = vq->vq_used_cons_idx + ndesc;
-        VQUEUE_FLUSH(&vring_used_event(&vq->vq_ring),
-				    sizeof(vring_used_event(&vq->vq_ring)));
+        VQUEUE_FLUSH(&vring_used_event(&vq->vq_ring), sizeof(vring_used_event(&vq->vq_ring)));
     }
     else
     {
         vq->vq_ring.avail->flags &= ~(uint16_t)VRING_AVAIL_F_NO_INTERRUPT;
-        VQUEUE_FLUSH(&vq->vq_ring.avail->flags,
-				    sizeof(vq->vq_ring.avail->flags));
+        VQUEUE_FLUSH(&vq->vq_ring.avail->flags, sizeof(vq->vq_ring.avail->flags));
     }
 
     env_mb();
@@ -775,10 +764,9 @@ static int32_t vq_ring_must_notify_host(struct virtqueue *vq)
     {
         /* coco begin validated: This part does not need to be tested because VIRTQUEUE_FLAG_EVENT_IDX is not being
          * utilized in rpmsg_lite implementation */
-        new_idx   = vq->vq_ring.avail->idx;
-        prev_idx  = new_idx - vq->vq_queued_cnt;
-        VQUEUE_INVALIDATE(&vring_avail_event(&vq->vq_ring),
-					 sizeof(vring_avail_event(&vq->vq_ring)));
+        new_idx  = vq->vq_ring.avail->idx;
+        prev_idx = new_idx - vq->vq_queued_cnt;
+        VQUEUE_INVALIDATE(&vring_avail_event(&vq->vq_ring), sizeof(vring_avail_event(&vq->vq_ring)));
         event_idx = (uint16_t)vring_avail_event(&vq->vq_ring);
 
         return ((vring_need_event(event_idx, new_idx, prev_idx) != 0) ? 1 : 0);
@@ -786,8 +774,7 @@ static int32_t vq_ring_must_notify_host(struct virtqueue *vq)
     /* coco end */
 
     /* Invalidate flags before read */
-    VQUEUE_INVALIDATE(&vq->vq_ring.used->flags,
-					 sizeof(vq->vq_ring.used->flags));
+    VQUEUE_INVALIDATE(&vq->vq_ring.used->flags, sizeof(vq->vq_ring.used->flags));
     return (((vq->vq_ring.used->flags & ((uint16_t)VRING_USED_F_NO_NOTIFY)) == 0U) ? 1 : 0);
 }
 

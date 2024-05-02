@@ -227,6 +227,7 @@ void platform_cache_disable(void)
  */
 void platform_cache_flush(void *data, uint32_t len)
 {
+	xthal_dcache_region_writeback(data, len);
 }
 
 /**
@@ -237,6 +238,7 @@ void platform_cache_flush(void *data, uint32_t len)
  */
 void platform_cache_invalidate(void *data, uint32_t len)
 {
+	xthal_dcache_region_invalidate(data, len);
 }
 
 /**

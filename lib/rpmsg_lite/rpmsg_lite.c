@@ -4,7 +4,6 @@
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
  * Copyright 2016-2024 NXP
  * Copyright 2021 ACRIOS Systems s.r.o.
- * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -211,6 +210,9 @@ static void rpmsg_lite_tx_callback(struct virtqueue *vq)
 static void vq_tx_remote(struct virtqueue *tvq, void *buffer, uint32_t len, uint16_t idx)
 {
     int32_t status;
+
+    env_cache_flush(buffer, len);
+
     status = virtqueue_add_consumed_buffer(tvq, idx, len);
     RL_ASSERT(status == VQUEUE_SUCCESS); /* must success here */
 
@@ -231,7 +233,14 @@ static void vq_tx_remote(struct virtqueue *tvq, void *buffer, uint32_t len, uint
  */
 static void *vq_tx_alloc_remote(struct virtqueue *tvq, uint32_t *len, uint16_t *idx)
 {
-    return virtqueue_get_available_buffer(tvq, idx, len);
+    void *data = NULL;
+
+    data = virtqueue_get_available_buffer(tvq, idx, len);
+    if (data)
+    {
+        env_cache_invalidate(data, *len);
+    }
+    return data;
 }
 
 /*!
@@ -247,7 +256,15 @@ static void *vq_tx_alloc_remote(struct virtqueue *tvq, uint32_t *len, uint16_t *
  */
 static void *vq_rx_remote(struct virtqueue *rvq, uint32_t *len, uint16_t *idx)
 {
-    return virtqueue_get_available_buffer(rvq, idx, len);
+    void *data = NULL;
+
+    data = virtqueue_get_available_buffer(rvq, idx, len);
+    if (data)
+    {
+        env_cache_invalidate(data, *len);
+    }
+
+    return data;
 }
 
 /*!
@@ -298,6 +315,9 @@ static void vq_rx_free_remote(struct virtqueue *rvq, void *buffer, uint32_t len,
 static void vq_tx_master(struct virtqueue *tvq, void *buffer, uint32_t len, uint16_t idx)
 {
     int32_t status;
+
+    env_cache_flush(buffer, len);
+
     status = virtqueue_add_buffer(tvq, idx);
     RL_ASSERT(status == VQUEUE_SUCCESS); /* must success here */
 
@@ -318,7 +338,15 @@ static void vq_tx_master(struct virtqueue *tvq, void *buffer, uint32_t len, uint
  */
 static void *vq_tx_alloc_master(struct virtqueue *tvq, uint32_t *len, uint16_t *idx)
 {
-    return virtqueue_get_buffer(tvq, len, idx);
+    void *data = NULL;
+
+    data = virtqueue_get_buffer(tvq, len, idx);
+    if (data)
+    {
+        env_cache_invalidate(data, *len);
+    }
+
+    return data;
 }
 
 /*!
@@ -334,7 +362,16 @@ static void *vq_tx_alloc_master(struct virtqueue *tvq, uint32_t *len, uint16_t *
  */
 static void *vq_rx_master(struct virtqueue *rvq, uint32_t *len, uint16_t *idx)
 {
-    return virtqueue_get_buffer(rvq, len, idx);
+    void *data = NULL;
+
+    data = virtqueue_get_buffer(rvq, len, idx);
+
+    if (data)
+    {
+        env_cache_invalidate(data, *len);
+    }
+
+    return data;
 }
 
 /*!
@@ -353,6 +390,7 @@ static void vq_rx_free_master(struct virtqueue *rvq, void *buffer, uint32_t len,
 #if defined(RL_CLEAR_USED_BUFFERS) && (RL_CLEAR_USED_BUFFERS == 1)
     env_memset(buffer, 0x00, len);
 #endif
+
     status = virtqueue_add_buffer(rvq, idx);
     RL_ASSERT(status == VQUEUE_SUCCESS); /* must success here */
 

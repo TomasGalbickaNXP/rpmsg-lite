@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2019 NXP
- * All rights reserved.
+ * Copyright 2016-2024 NXP
  *
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -197,6 +196,26 @@ void platform_cache_all_flush_invalidate(void)
 void platform_cache_disable(void)
 {
     fprintf(stderr, "%s unsupported\n", __FUNCTION__);
+}
+
+/**
+ * platform_cache_flush
+ *
+ * Empty implementation
+ *
+ */
+void platform_cache_flush(void *data, uint32_t len)
+{
+}
+
+/**
+ * platform_cache_invalidate
+ *
+ * Empty implementation
+ *
+ */
+void platform_cache_invalidate(void *data, uint32_t len)
+{
 }
 
 /**

@@ -281,7 +281,7 @@ int32_t platform_init(void)
 
     /* Register interrupt handler for MU_B on HiFi1 */
 #ifdef SDK_OS_BAREMETAL
-    _xtos_set_interrupt_handler(6, MU_B_IRQHandler);
+    _xtos_set_interrupt_handler(6, MU3_B_IRQHandler);
 #else
     xos_register_interrupt_handler(6, MU3_B_IRQHandler, ((void *)0));
 #endif

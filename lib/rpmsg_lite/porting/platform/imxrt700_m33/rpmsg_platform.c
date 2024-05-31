@@ -479,7 +479,7 @@ void platform_cache_flush(void *data, uint32_t len)
 
     /* Cache is handled only on core0 */
 #if (defined(MIMXRT798S_cm33_core0_SERIES))
-    XCACHE_CleanCacheByRange(*(uint32_t *)data, len);
+    XCACHE_CleanCacheByRange((uint32_t)data, len);
 #endif
 }
 
@@ -501,7 +501,7 @@ void platform_cache_invalidate(void *data, uint32_t len)
 
     /* Cache is handled only on core0 */
 #if (defined(MIMXRT798S_cm33_core0_SERIES))
-    XCACHE_InvalidateCacheByRange(*(uint32_t *)data, len);
+    XCACHE_InvalidateCacheByRange((uint32_t)data, len);
 #endif
 }
 

@@ -93,6 +93,10 @@ int32_t virtqueue_create_static(uint16_t id,
 
         vring_init(&vq->vq_ring, vq->vq_nentries, vq->vq_ring_mem, (uint32_t)vq->vq_alignment);
 
+        /* Cache flush initialized virt queue ring pointers */
+        VQUEUE_FLUSH(vq->vq_ring.avail, sizeof(struct vring_avail));
+        VQUEUE_FLUSH(vq->vq_ring.used, sizeof(struct vring_used));
+
         *v_queue = vq;
     }
 
@@ -152,6 +156,10 @@ int32_t virtqueue_create(uint16_t id,
         vq->vq_ring_mem  = (void *)ring->phy_addr;
 
         vring_init(&vq->vq_ring, vq->vq_nentries, vq->vq_ring_mem, (uint32_t)vq->vq_alignment);
+
+        /* Cache flush initialized virt queue ring pointers */
+        VQUEUE_FLUSH(vq->vq_ring.avail, sizeof(struct vring_avail));
+        VQUEUE_FLUSH(vq->vq_ring.used, sizeof(struct vring_used));
 
         *v_queue = vq;
     }
@@ -226,6 +234,8 @@ int32_t virtqueue_fill_avail_buffers(struct virtqueue *vq, void *buffer, uint32_
         dp->len   = len;
         dp->flags = VRING_DESC_F_WRITE;
 
+        VQUEUE_FLUSH(&vq->vq_ring.desc[head_idx], sizeof(vq->vq_ring.desc[head_idx]));
+
         vq->vq_desc_head_idx++;
 
         vq_ring_update_avail(vq, head_idx);
@@ -266,7 +276,6 @@ void *virtqueue_get_buffer(struct virtqueue *vq, uint32_t *len, uint16_t *idx)
 
     /* Invalidate used->ring before it is read */
     VQUEUE_INVALIDATE(&vq->vq_ring.used->ring[used_idx], sizeof(vq->vq_ring.used->ring[used_idx]));
-
     desc_idx = (uint16_t)uep->id;
     if (len != VQ_NULL)
     {
@@ -376,6 +385,7 @@ void *virtqueue_get_available_buffer(struct virtqueue *vq, uint16_t *avail_idx, 
     *avail_idx = vq->vq_ring.avail->ring[head_idx];
 
     env_rmb();
+
 #if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
     buffer = env_map_patova(vq->env, ((uint32_t)(vq->vq_ring.desc[*avail_idx].addr)));
 #else
@@ -518,8 +528,8 @@ void virtqueue_dump(struct virtqueue *vq)
         return;
     }
     /* Invalidate avail and used before read */
-    VQUEUE_INVALIDATE(&vq->vq_ring.avail, sizeof(vq->vq_ring.avail));
-    VQUEUE_INVALIDATE(&vq->vq_ring.used, sizeof(vq->vq_ring.used));
+    VQUEUE_INVALIDATE(vq->vq_ring.avail, sizeof(struct vring_avail));
+    VQUEUE_INVALIDATE(vq->vq_ring.used, sizeof(struct vring_used));
 
     env_print(
         "VQ: %s - size=%d; used=%d; queued=%d; "
@@ -644,6 +654,8 @@ static void vq_ring_update_avail(struct virtqueue *vq, uint16_t desc_idx)
      * currently running on another CPU, we can keep it processing the new
      * descriptor.
      */
+    /* Invalidate avail->idx before read */
+    VQUEUE_INVALIDATE(&vq->vq_ring.avail->idx, sizeof(vq->vq_ring.avail->idx));
     avail_idx                          = (uint16_t)(vq->vq_ring.avail->idx & ((uint16_t)(vq->vq_nentries - 1U)));
     vq->vq_ring.avail->ring[avail_idx] = desc_idx;
 
@@ -652,10 +664,10 @@ static void vq_ring_update_avail(struct virtqueue *vq, uint16_t desc_idx)
 
     env_wmb();
 
+    vq->vq_ring.avail->idx++;
+
     /* Flush idx after write */
     VQUEUE_FLUSH(&vq->vq_ring.avail->idx, sizeof(vq->vq_ring.avail->idx));
-
-    vq->vq_ring.avail->idx++;
 
     /* Keep pending count until virtqueue_notify(). */
     vq->vq_queued_cnt++;
@@ -678,6 +690,8 @@ static void vq_ring_update_used(struct virtqueue *vq, uint16_t head_idx, uint32_
      * currently running on another CPU, we can keep it processing the new
      * descriptor.
      */
+    /* Invalidate used->idx before read */
+    VQUEUE_INVALIDATE(&vq->vq_ring.used->idx, sizeof(vq->vq_ring.used->idx));
     used_idx       = vq->vq_ring.used->idx & (vq->vq_nentries - 1U);
     used_desc      = &(vq->vq_ring.used->ring[used_idx]);
     used_desc->id  = head_idx;
@@ -764,6 +778,8 @@ static int32_t vq_ring_must_notify_host(struct virtqueue *vq)
     {
         /* coco begin validated: This part does not need to be tested because VIRTQUEUE_FLAG_EVENT_IDX is not being
          * utilized in rpmsg_lite implementation */
+        /* Invalidate avail->idx before read */
+        VQUEUE_INVALIDATE(&vq->vq_ring.avail->idx, sizeof(vq->vq_ring.avail->idx));
         new_idx  = vq->vq_ring.avail->idx;
         prev_idx = new_idx - vq->vq_queued_cnt;
         VQUEUE_INVALIDATE(&vring_avail_event(&vq->vq_ring), sizeof(vring_avail_event(&vq->vq_ring)));

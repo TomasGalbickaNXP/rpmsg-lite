@@ -98,6 +98,7 @@ The RPMsg-Lite can be configured at the compile time. The default configuration 
 |RL_BUFFER_COUNT               | (2)           | Number of the buffers, it must be power of two (2, 4, ...)      |
 |RL_API_HAS_ZEROCOPY           | (1)           | Zero-copy API functions enabled/disabled.          |
 |RL_USE_STATIC_API             | (0)           | Static API functions (no dynamic allocation) enabled/disabled.    |
+|RL_USE_DCACHE                 | (0)           | Memory cache management of shared memory. Use in case of data cache is enabled for shared memory.     |
 |RL_CLEAR_USED_BUFFERS         | (0)           | Clearing used buffers before returning back to the pool of free buffers enabled/disabled.   |
 |RL_USE_MCMGR_IPC_ISR_HANDLER  | (0)           | When enabled IPC interrupts are managed by the Multicore Manager (IPC interrupts router), when disabled RPMsg-Lite manages IPC interrupts by itself.   |
 |RL_USE_ENVIRONMENT_CONTEXT    | (0)           | When enabled the environment layer uses its own context. Required for some environments (QNX). The default value is 0 (no context, saves some RAM).    |
@@ -131,4 +132,3 @@ This table summarizes revisions of this document.
 |13.0           | 04/2022 | Introduced new rpmsg_lite_wait_for_link_up() API function - this allows to avoid using busy loops in rtos environments, GitHub PR #21. <p> Adjust rpmsg_lite_is_link_up() to return RL_TRUE/RL_FALSE.  |
 |14.0           | 10/2022 | Timeout parameter added to rpmsg_lite_wait_for_link_up API function. <p> VRING_SIZE is set based on number of used buffers now (as calculated in vring_init) - updated for all platforms that are not communicating to Linux rpmsg counterpart. <p> Improveed debug check buffers implementation - instead of checking the pointer fits into shared memory check the presence in the VirtIO ring descriptors list.  |
 |15.0           | 06/2023 | Resolved issues in ThreadX env. layer implementation. <p> Added aarch64 support. <p> Increased the queue size to (2 * RL_BUFFER_COUNT) to cover zero copy cases.  |
-

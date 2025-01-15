@@ -16,6 +16,6 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: gh-pages
-          folder: ./
+          folder: doxygen/
           config_file: doxygen/Doxyfile.rpmsglite
           doxygen_version: 1.9.6

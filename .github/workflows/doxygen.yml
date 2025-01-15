@@ -45,7 +45,7 @@ jobs:
 
     - name: Install Doxygen v${{ github.event.inputs.doxygen_version }}
       run: |
-        transformed_version=$(echo "${{ inputs.doxygen_version }}" | tr '.' '_')
+        transformed_version=$(echo "${{ github.event.inputs.doxygen_version }}" | tr '.' '_')
         wget https://github.com/doxygen/doxygen/releases/download/Release_${transformed_version}/doxygen-${{ github.event.inputs.doxygen_version }}.linux.bin.tar.gz
         tar -xzf doxygen-${{ github.event.inputs.doxygen_version }}.linux.bin.tar.gz
         sudo mv doxygen-${{ github.event.inputs.doxygen_version }}/bin/doxygen /usr/local/bin/doxygen

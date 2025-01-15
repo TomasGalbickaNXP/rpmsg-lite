@@ -43,10 +43,10 @@ jobs:
       run: sudo apt-get update && sudo apt-get install -y wget graphviz
       shell: bash
 
-    - name: Install Doxygen v${{ github.event.inputs.doxygen_version }}
+    - name: Install Doxygen v${{ inputs.doxygen_version }}
       run: |
-        transformed_version=$(echo "${{ github.event.inputs.doxygen_version }}" | tr '.' '_')
-        wget https://github.com/doxygen/doxygen/releases/download/Release_${transformed_version}/doxygen-${{ github.event.inputs.doxygen_version }}.linux.bin.tar.gz
+        transformed_version=$(echo "${{ inputs.doxygen_version }}" | tr '.' '_')
+        wget https://github.com/doxygen/doxygen/releases/download/Release_${transformed_version}/doxygen-${{ inputs.doxygen_version }}.linux.bin.tar.gz
         tar -xzf doxygen-${{ github.event.inputs.doxygen_version }}.linux.bin.tar.gz
         sudo mv doxygen-${{ github.event.inputs.doxygen_version }}/bin/doxygen /usr/local/bin/doxygen
       shell: bash
@@ -54,20 +54,20 @@ jobs:
     - name: Generate Doxygen Documentation
       run: |
         cd doxygen/
-        doxygen ${{ github.event.inputs.config_file }}
+        doxygen ${{ inputs.config_file }}
       shell: bash
       
     - name: Create .nojekyll (ensures pages with underscores work on gh pages)
-      run: touch ${{ github.event.inputs.folder }}/.nojekyll
+      run: touch ${{ inputs.folder }}/.nojekyll
       shell: bash
 
     - name: Deploy to GitHub Pages
       uses: JamesIves/github-pages-deploy-action@v4
       with:
-        token: ${{ github.event.inputs.github_token }}
-        branch: ${{ github.event.inputs.branch }}
-        folder: ${{ github.event.inputs.folder }}
-        target-folder: ${{ github.event.inputs.target_folder }}
+        token: ${{ inputs.github_token }}
+        branch: ${{ inputs.branch }}
+        folder: ${{ inputs.folder }}
+        target-folder: ${{ inputs.target_folder }}
     # steps:
     #   - uses: DenverCoder1/doxygen-github-pages-action@v2.0.0
     #     with:

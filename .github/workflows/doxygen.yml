@@ -5,29 +5,11 @@ on:
     branches:
       - main_test
   workflow_dispatch:
-    inputs:
-      github_token:
-        description: 'A GitHub token for pushing to the repo. Example: https://git.io/passing-token'
-        required: true
-      branch:
-        description: 'Branch name for pushing GitHub pages files'
-        required: true
-        default: "gh-pages"
-      folder:
-        description: 'Folder where Doxygen will generate the HTML build files'
-        required: true
-        default: "docs/html"
-      config_file:
-        description: 'Path of the Doxygen configuration file'
-        required: true
-        default: "Doxyfile"
-      target_folder:
-        description: 'Directory on the deployment branch for pushing the build files'
-        required: false
-      doxygen_version:
-        description: 'Version of Doxygen to install'
-        required: false
-        default: "1.9.6"
+env:
+  doxygen_version: "1.9.6"
+  branch: "gh-pages-test"
+  directory: "doc"
+  target_dir: "."
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -43,31 +25,31 @@ jobs:
       run: sudo apt-get update && sudo apt-get install -y wget graphviz
       shell: bash
 
-    - name: Install Doxygen v${{ inputs.doxygen_version }}
+    - name: Install Doxygen v${doxygen_version}
       run: |
-        transformed_version=$(echo "${{ inputs.doxygen_version }}" | tr '.' '_')
-        wget https://github.com/doxygen/doxygen/releases/download/Release_${transformed_version}/doxygen-${{ inputs.doxygen_version }}.linux.bin.tar.gz
-        tar -xzf doxygen-${{ github.event.inputs.doxygen_version }}.linux.bin.tar.gz
-        sudo mv doxygen-${{ github.event.inputs.doxygen_version }}/bin/doxygen /usr/local/bin/doxygen
+        transformed_version=$(echo "${doxygen_version}" | tr '.' '_')
+        wget https://github.com/doxygen/doxygen/releases/download/Release_${transformed_version}/doxygen-${doxygen_version}.linux.bin.tar.gz
+        tar -xzf doxygen-${doxygen_version}.linux.bin.tar.gz
+        sudo mv doxygen-${doxygen_version}/bin/doxygen /usr/local/bin/doxygen
       shell: bash
 
     - name: Generate Doxygen Documentation
       run: |
         cd doxygen/
-        doxygen ${{ inputs.config_file }}
+        doxygen Doxyfile.rpmsglite
       shell: bash
       
     - name: Create .nojekyll (ensures pages with underscores work on gh pages)
-      run: touch ${{ inputs.folder }}/.nojekyll
+      run: touch ${directory}/.nojekyll
       shell: bash
 
     - name: Deploy to GitHub Pages
       uses: JamesIves/github-pages-deploy-action@v4
       with:
-        token: ${{ inputs.github_token }}
-        branch: ${{ inputs.branch }}
-        folder: ${{ inputs.folder }}
-        target-folder: ${{ inputs.target_folder }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+        branch: ${branch}
+        folder: ${directory}
+        target-folder: ${target_folder}
     # steps:
     #   - uses: DenverCoder1/doxygen-github-pages-action@v2.0.0
     #     with:

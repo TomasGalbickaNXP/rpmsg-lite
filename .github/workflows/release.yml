@@ -7,7 +7,7 @@ name: Release workflow
 on:
   push:
     tags:
-      - '*'
+      - '**'
   # workflow_dispatch:
     # Inputs the workflow accepts.
     # inputs:

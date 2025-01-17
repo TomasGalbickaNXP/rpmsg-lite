@@ -9,21 +9,21 @@ on:
     # branches:
     #   - 'main_test'
     tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+'
-      # - '*'
-  workflow_dispatch:
+      # - 'v[0-9]+.[0-9]+.[0-9]+'
+      - '*'
+  # workflow_dispatch:
     # Inputs the workflow accepts.
-    inputs:
-      tag:
-        description: 'Specify new tag to create'
-        default: "v5.1.3"
-        required: true
-        type: string
-      branch:
-        description: 'Specify release branch on which to do tag'
-        default: "release/24.12.00"
-        required: true
-        type: string
+    # inputs:
+    #   tag:
+    #     description: 'Specify new tag to create'
+    #     default: "v5.1.3"
+    #     required: true
+    #     type: string
+    #   branch:
+    #     description: 'Specify release branch on which to do tag'
+    #     default: "release/24.12.00"
+    #     required: true
+    #     type: string
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -35,9 +35,11 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     # Runs a single command using the runners shell
-    - name: Create tag
-      run: |
-        echo "Creating tag ${{ inputs.tag }} on ${{ inputs.branch }}"
+    # - name: Create tag
+    #   run: |
+    #     echo "Creating tag ${{ inputs.tag }} on ${{ inputs.branch }}"
     - name: Create release
       run: | 
-        echo "Creating ${{ inputs.tag }} Release"
+        echo "Creating ${{ github.ref_name }} Release"
+        echo "Tag name from GITHUB_REF_NAME: $GITHUB_REF_NAME"
+        echo "Tag name from github.ref_name: ${{ github.ref_name }}"

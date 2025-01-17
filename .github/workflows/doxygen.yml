@@ -48,7 +48,7 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         branch: ${branch}
-        folder: ${directory}
+        folder: doc
         target-folder: ${target_folder}
     # steps:
     #   - uses: DenverCoder1/doxygen-github-pages-action@v2.0.0

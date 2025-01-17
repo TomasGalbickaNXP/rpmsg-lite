@@ -34,7 +34,16 @@ jobs:
     # Runs a single command using the runners shell
     - name: Create tag
       run: |
-        echo "Creating tag ${{ inputs.tag }} on ${{ inputs.branch }}"
+        uses: actions/github-script@v7
+        echo "Creating tag ${{ inputs.tag }} on ${{ inputs.branch }}"        
+        with:
+          script: |
+            github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/${{ inputs.tag }}',
+              sha: context.sha
+            })
     - name: Create release
       run: | 
         echo "Creating ${{ inputs.tag }} Release"

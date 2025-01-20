@@ -28,7 +28,7 @@ jobs:
           new_tag="${{ github.ref_name }}"
           new_tag="${new_tag:1}"
           echo "New Tag: ${new_tag}"
-          awk -v ver="${new_tag}" '/^#+ \[/ { if (p) { exit }; if ($2 == "["ver"]") { p=1; next} } p && NF' "CHANGELOG.md" >> $GITHUB_OUTPUTS
+          awk -v ver="${new_tag}" '/^#+ \[/ { if (p) { exit }; if ($2 == "["ver"]") { p=1; next} } p && NF' "CHANGELOG.md" >> $GITHUB_OUTPUT
       - name: Test
         run: cat Release.txt
       - name: Create Release

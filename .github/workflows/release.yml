@@ -28,11 +28,7 @@ jobs:
           new_tag="${{ github.ref_name }}"
           new_tag="${new_tag:1}"
           echo "New Tag: ${new_tag}"
-          {
-            echo 'BODY_TEXT<<EOF'
-            awk -v ver="${new_tag}" '/^#+ \[/ { if (p) { exit }; if ($2 == "["ver"]") { p=1; next} } p && NF' "CHANGELOG.md"
-            echo EOF
-          } >> "$GITHUB_ENV"
+          awk -v ver="${new_tag}" '/^#+ \[/ { if (p) { exit }; if ($2 == "["ver"]") { p=1; next} } p && NF' "CHANGELOG.md" > rel_changelog.txt
       - name: Test
         run: |
           cat Release.txt
@@ -42,6 +38,6 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: Release.txt
-          # body_path: Release.txt
-          body: "Body of this release: ${{ steps.build.outputs.BODY_TEXT }}"
+          body_path: rel_changelog.txt
+          # body: "Body of this release: ${{ steps.build.outputs.BODY_TEXT }}"
           name: "Release ${{ github.ref_name }}"

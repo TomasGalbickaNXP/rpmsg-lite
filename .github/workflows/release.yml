@@ -6,7 +6,9 @@ name: Release workflow
 # or API .
 on:
   push:
-    tags: v[1-9]+.[0-9]+.[0-9]+
+    tags:
+    - '*'
+    # tags: v[1-9]+.[0-9]+.[0-9]+
     # tags: '**'
     # branches: main
   # workflow_dispatch:

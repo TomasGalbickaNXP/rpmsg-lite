@@ -41,5 +41,5 @@ jobs:
         with:
           files: Release.txt
           # body_path: Release.txt
-          body: "${{ steps.build.outputs.* }}"
+          body: "${{ steps.build.outputs.BODY_TEXT }}"
           name: "Release ${{ github.ref_name }}"

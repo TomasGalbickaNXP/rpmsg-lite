@@ -34,12 +34,14 @@ jobs:
             echo EOF
           } >> "$GITHUB_ENV"
       - name: Test
-        run: cat Release.txt
+        run: |
+          cat Release.txt
+          echo Build Output: ${{ steps.build.outputs.BODY_TEXT }}
       - name: Create Release
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: Release.txt
           # body_path: Release.txt
-          body: "${{ steps.build.outputs.BODY_TEXT }}"
+          body: "Body of this release: ${{ steps.build.outputs.BODY_TEXT }}"
           name: "Release ${{ github.ref_name }}"

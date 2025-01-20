@@ -19,11 +19,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Build
+        id: build
         run: |
           echo ${{ github.sha }} > Release.txt
           echo "Creating ${{ github.ref_name }} Release"
           echo "Tag name from GITHUB_REF_NAME: $GITHUB_REF_NAME"
           echo "Tag name from github.ref_name: ${{ github.ref_name }}"
+          new_tag="${{ github.ref_name }}"
+          new_tag="${new_tag:1}"
+          echo "New Tag: ${new_tag}"
+          awk -v ver="${new_tag}" '/^#+ \[/ { if (p) { exit }; if ($2 == "["ver"]") { p=1; next} } p && NF' "CHANGELOG.md" >> $GITHUB_OUTPUTS
       - name: Test
         run: cat Release.txt
       - name: Create Release
@@ -32,5 +37,5 @@ jobs:
         with:
           files: Release.txt
           # body_path: Release.txt
-          body: "TESTTT"
+          body: "${{ steps.build.outputs.* }}"
           name: "Release ${{ github.ref_name }}"

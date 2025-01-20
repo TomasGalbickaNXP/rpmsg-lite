@@ -5,7 +5,7 @@ name: Release workflow
 # Controls when the action will run. Workflow runs when manually triggered using the UI
 # or API .
 on:
-  create:
+  push:
     # tags: v[1-9]+.[0-9]+.[0-9]+
     tags: '**'
     # branches: main

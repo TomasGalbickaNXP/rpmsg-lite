@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.0.1] - 13-Jan-2025
+
+### Added
+
+- Added github workflows
+
 ## [5.1.3] - 13-Jan-2025
 
 ### Added

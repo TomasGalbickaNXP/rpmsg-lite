@@ -1,12 +1,12 @@
-# RPMSG Adapter V3 — Multicore Optimized Implementation
+# RPMSG Adapter V4 — Multicore Optimized Implementation
 
 ## Overview
 
-The V3 RPMSG adapter is a major architectural improvement over V2, specifically designed for multicore applications where a single core needs to communicate with multiple peer cores simultaneously using `rpmsg-lite`.
+The V4 RPMSG adapter is a major architectural improvement over V2, specifically designed for multicore applications where a single core needs to communicate with multiple peer cores simultaneously using `rpmsg-lite`.
 
-While V2 fixed many bugs and added core-agnostic configuration, it still relied on global state, which limited it to a single peer-core communication link at a time. V3 refactors this state into a per-link structure, allowing multiple concurrent links.
+While V2 fixed many bugs and added core-agnostic configuration, it still relied on global state, which limited it to a single peer-core communication link at a time. V4 refactors this state into a per-link structure, allowing multiple concurrent links.
 
-## Key Improvements in V3
+## Key Improvements in V4
 
 1.  **Multi-Link Support**: State is now encapsulated in `hal_rpmsg_link_state_t`. An array of these structures (`s_rpmsg_links`) allows supporting multiple peer cores (configurable via `HAL_RPMSG_MAX_LINKS`).
 2.  **Explicit Link Initialization**: New `HAL_RpmsgMcmgrInitExt()` API allows initializing a specific link ID with a custom configuration (`hal_rpmsg_link_config_t`).
@@ -35,7 +35,7 @@ typedef struct _hal_rpmsg_link_config
 } hal_rpmsg_link_config_t;
 ```
 
-## Migration Guide (V2 → V3)
+## Migration Guide (V2 → V4)
 
 ### Single-Link Application
 No changes required. `HAL_RpmsgMcmgrInit()` and existing `HAL_RpmsgInit()` calls will continue to work using Link 0.
